@@ -374,6 +374,8 @@ def cmd_services_add(args, uon: UonClient) -> None:
         "city": args.city,
         "country": args.country,
         "tourists_count": args.tourists_count,
+        "nutrition": args.nutrition,
+        "hotel_type": args.hotel_type,
     }
     for kv in args.field or []:
         k, _, v = kv.partition("=")
@@ -491,12 +493,16 @@ def cmd_webhooks_delete(args, uon: UonClient) -> None:
 def cmd_reminders_create(args, uon: UonClient) -> None:
     data = {
         "r_id": args.request_id,
-        "u_id": args.tourist_id,
+        "tr_id": args.tourist_id,
         "manager_id": args.manager_id,
         "text": args.text,
-        "date_from": args.date_from,
-        "date_to": args.date_to,
+        "type_id": args.type_id,
+        "datetime": args.date_from,
+        "datetime_to": args.date_to,
     }
+    for kv in args.field or []:
+        k, _, v = kv.partition("=")
+        data[k.strip()] = v.strip()
     dump(uon.post("reminder/create", {k: v for k, v in data.items() if v is not None}))
 
 
@@ -962,6 +968,8 @@ def build_parser() -> argparse.ArgumentParser:
     sa.add_argument("--city", default=None, help="Город (строкой)")
     sa.add_argument("--country", default=None, help="Страна (строкой)")
     sa.add_argument("--tourists-count", type=int, default=None, dest="tourists_count")
+    sa.add_argument("--nutrition", default=None, help="Тип питания (для type=1): RO/BB/HB/FB/AI/UAI")
+    sa.add_argument("--hotel-type", default=None, dest="hotel_type", help="Категория (для type=1): 3*/4*/5*/Apts/Villa")
     sa.add_argument("-F", "--field", action="append", help="Доп. поле key=value")
     sa.set_defaults(func=cmd_services_add)
     su = svc_sub.add_parser("update", help="Обновить услугу")
@@ -1062,8 +1070,11 @@ def build_parser() -> argparse.ArgumentParser:
     rc.add_argument("--tourist-id", type=int, default=None, dest="tourist_id")
     rc.add_argument("--manager-id", type=int, default=None, dest="manager_id")
     rc.add_argument("--text", required=True)
-    rc.add_argument("--from", default=None, dest="date_from", help="YYYY-MM-DD HH:MM:SS")
-    rc.add_argument("--to", default=None, dest="date_to")
+    rc.add_argument("--type-id", type=int, default=1, dest="type_id",
+                    help="0=не определено, 1=звонок (default), 2=письмо, 3=встреча")
+    rc.add_argument("--from", required=True, dest="date_from", help="YYYY-MM-DD HH:MM:SS")
+    rc.add_argument("--to", required=True, dest="date_to", help="YYYY-MM-DD HH:MM:SS")
+    rc.add_argument("-F", "--field", action="append")
     rc.set_defaults(func=cmd_reminders_create)
 
     # extended_fields (доп. поля карточек)
