@@ -267,3 +267,93 @@ def test_leads_update_requires_payload(uon):
     _, rec = uon
     with _p.raises(SystemExit):
         run_cli(["leads", "update", "1"], rec)
+
+
+def test_users_create_full_card(uon):
+    """Карточка туриста с паспортами, мессенджерами, метками, гражданством."""
+    _, rec = uon
+    run_cli([
+        "users", "create",
+        "--name", "Анна", "--surname", "Иванова", "--phone", "+79991234567",
+        "--patronymic", "Петровна", "--sex", "ж", "--birthday", "1990-05-15",
+        "--email", "a@example.com",
+        "--telegram", "@anna", "--whatsapp", "+79991234567", "--max", "anna_max",
+        "--zagran-number", "73 1234567", "--zagran-given", "2023-01-01",
+        "--zagran-expire", "2033-01-01", "--zagran-org", "УВД Москвы",
+        "--passport-number", "4515 987654", "--passport-taken", "ОВД Тверского",
+        "--passport-date", "2010-03-01", "--passport-code", "770-001",
+        "--inn", "770123456789",
+        "--nationality-id", "1",
+        "--labels", "VIP,Семья,Активный отдых",
+        "--discount", "10",
+    ], rec)
+    body = rec.calls[-1]["body"]
+    # ФИО
+    assert "u_name=" in body and "u_surname=" in body and "u_sname=" in body
+    # Демография
+    assert "u_sex=" in body and "u_birthday=" in body
+    # Мессенджеры
+    assert "u_telegram=" in body and "u_max=" in body
+    # Паспорта
+    assert "u_zagran_number=" in body and "u_zagran_organization=" in body
+    assert "u_passport_number=" in body and "u_passport_taken=" in body
+    # Юр. лицо
+    assert "u_inn=" in body
+    # Связи
+    assert "nationality_id=1" in body
+    assert "u_labels=" in body
+    # Скидка
+    assert "u_discount=10" in body
+
+
+def test_users_update_single_field(uon):
+    _, rec = uon
+    run_cli(["users", "update", "5", "--labels", "VIP"], rec)
+    call = rec.calls[-1]
+    assert call["url"].endswith("/user/update/5.json")
+    assert "u_labels=VIP" in call["body"]
+
+
+def test_users_update_requires_payload(uon):
+    import pytest as _p
+    _, rec = uon
+    with _p.raises(SystemExit):
+        run_cli(["users", "update", "5"], rec)
+
+
+def test_labels_list(uon):
+    _, rec = uon
+    run_cli(["labels", "list"], rec)
+    assert rec.calls[-1]["url"].endswith("/user-label.json")
+
+
+def test_fields_list_filtered_by_section(uon):
+    _, rec = uon
+    run_cli(["fields", "list", "--section", "3"], rec)
+    assert rec.calls[-1]["url"].endswith("/extended_field/1.json")
+
+
+def test_fields_create(uon):
+    _, rec = uon
+    run_cli([
+        "fields", "create", "--section", "2", "--name", "Канал",
+        "--type", "2", "--options", "Сайт,IG,TG",
+    ], rec)
+    body = rec.calls[-1]["body"]
+    assert "section=2" in body
+    assert "name=" in body
+    assert "type=2" in body
+    assert "options=" in body
+
+
+def test_extended_field_via_minus_F(uon):
+    """Доп.поле прокидывается в lead через -F."""
+    _, rec = uon
+    run_cli([
+        "leads", "create", "--name", "Иван", "--phone", "+79991234567",
+        "-F", "extended_fields[199888]=Соцсети",
+    ], rec)
+    body = rec.calls[-1]["body"]
+    # urlencoded: extended_fields[199888] становится %5B...%5D
+    assert "extended_fields" in body
+    assert "199888" in body

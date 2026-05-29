@@ -199,14 +199,71 @@ def cmd_users_find(args, uon: UonClient) -> None:
         sys.exit("Нужен либо --phone, либо --email")
 
 
-def cmd_users_create(args, uon: UonClient) -> None:
-    data = {
+def _users_payload(args) -> dict:
+    """Общий маппинг CLI-аргументов на поля /user/create и /user/update."""
+    return {
+        # Тип записи и роль клиента
+        "u_type": args.type,
+        "u_tk_id": args.kind,
+        # ФИО
         "u_name": args.name,
         "u_surname": args.surname,
+        "u_sname": args.patronymic,
+        "u_name_en": args.name_en,
+        "u_surname_en": args.surname_en,
+        # Демография
+        "u_sex": args.sex,
+        "u_birthday": args.birthday,
+        "u_birthday_place": args.birth_place,
+        # Контакты
+        "u_phone": args.phone_home_extra,
         "u_phone_mobile": args.phone,
+        "u_phone_home": args.phone_home,
         "u_email": args.email,
-        "manager_id": args.manager_id,
+        "u_address": args.address,
+        # Соцсети и мессенджеры
+        "u_social_vk": args.vk,
+        "u_social_fb": args.fb,
+        "u_social_ok": args.ok,
+        "u_telegram": args.telegram,
+        "u_max": args.max,
+        "u_whatsapp": args.whatsapp,
+        "u_viber": args.viber,
+        "u_instagram": args.instagram,
+        # Загранпаспорт
+        "u_zagran_number": args.zagran_number,
+        "u_zagran_given": args.zagran_given,
+        "u_zagran_expire": args.zagran_expire,
+        "u_zagran_organization": args.zagran_org,
+        # Гражданский паспорт
+        "u_passport_number": args.passport_number,
+        "u_passport_taken": args.passport_taken,
+        "u_passport_date": args.passport_date,
+        "u_passport_code": args.passport_code,
+        # Свидетельство о рождении
+        "u_birthday_certificate": args.cert_number,
+        "u_birthday_certificate_given": args.cert_given,
+        # Юр. лицо
+        "u_company": args.company,
+        "u_position": args.position,
+        "u_inn": args.inn,
+        "u_kpp": args.kpp,
+        "u_ogrn": args.ogrn,
+        # Связи
+        "nationality_id": args.nationality_id,
+        "u_office_id": args.office_id,
+        "u_manager_id": args.manager_id,
+        "u_source": args.referrer_id,
+        "u_labels": args.labels,
+        # Бонусы и скидки
+        "u_discount": args.discount,
+        "u_discount_card_number": args.bonus_card,
+        "u_note": args.note,
     }
+
+
+def cmd_users_create(args, uon: UonClient) -> None:
+    data = _users_payload(args)
     for kv in args.field or []:
         k, _, v = kv.partition("=")
         data[k.strip()] = v.strip()
@@ -214,13 +271,7 @@ def cmd_users_create(args, uon: UonClient) -> None:
 
 
 def cmd_users_update(args, uon: UonClient) -> None:
-    data = {
-        "u_name": args.name,
-        "u_surname": args.surname,
-        "u_phone_mobile": args.phone,
-        "u_email": args.email,
-        "manager_id": args.manager_id,
-    }
+    data = _users_payload(args)
     for kv in args.field or []:
         k, _, v = kv.partition("=")
         data[k.strip()] = v.strip()
@@ -228,6 +279,10 @@ def cmd_users_update(args, uon: UonClient) -> None:
     if not payload:
         sys.exit("Нечего обновлять — задайте хотя бы одно поле")
     dump(uon.post(f"user/update/{args.id}", payload))
+
+
+def cmd_labels_list(args, uon: UonClient) -> None:
+    dump(uon.get("user-label"))
 
 
 def cmd_payments_list(args, uon: UonClient) -> None:
@@ -754,24 +809,84 @@ def build_parser() -> argparse.ArgumentParser:
     uf.add_argument("--phone", default=None)
     uf.add_argument("--email", default=None)
     uf.set_defaults(func=cmd_users_find)
-    uc = users_sub.add_parser("create", help="Создать туриста")
-    uc.add_argument("--name", required=True)
-    uc.add_argument("--surname", default=None)
-    uc.add_argument("--phone", required=True)
-    uc.add_argument("--email", default=None)
-    uc.add_argument("--manager-id", type=int, default=None, dest="manager_id")
-    uc.add_argument("-F", "--field", action="append", help="доп. поле key=value")
+    def _user_args(p, *, name_required: bool, phone_required: bool):
+        # ФИО
+        p.add_argument("--name", required=name_required)
+        p.add_argument("--surname", default=None)
+        p.add_argument("--patronymic", default=None, help="Отчество (u_sname)")
+        p.add_argument("--name-en", default=None, dest="name_en", help="Имя латиницей (для виз)")
+        p.add_argument("--surname-en", default=None, dest="surname_en")
+        # Демография
+        p.add_argument("--sex", default=None, choices=["м", "ж"], help="Пол")
+        p.add_argument("--birthday", default=None, help="День рождения YYYY-MM-DD")
+        p.add_argument("--birth-place", default=None, dest="birth_place", help="Место рождения")
+        # Тип записи
+        p.add_argument("--type", type=int, default=None, choices=[1, 2, 3],
+                       help="1=физ.лицо (default), 2=юр.лицо, 3=турагентство")
+        p.add_argument("--kind", type=int, default=None, choices=[1, 2, 3, 4, 5],
+                       help="Тип клиента: 1=Mr, 2=Mrs, 3=Miss, 4=Child, 5=Infant")
+        # Контакты
+        p.add_argument("--phone", required=phone_required, help="Моб. телефон (u_phone_mobile)")
+        p.add_argument("--phone-home", default=None, dest="phone_home", help="Домашний (u_phone_home)")
+        p.add_argument("--phone-extra", default=None, dest="phone_home_extra", help="Доп. контактный (u_phone)")
+        p.add_argument("--email", default=None)
+        p.add_argument("--address", default=None, help="Адрес фактический")
+        # Соцсети и мессенджеры
+        p.add_argument("--vk", default=None, help="Ссылка ВКонтакте")
+        p.add_argument("--fb", default=None, help="Ссылка Facebook")
+        p.add_argument("--ok", default=None, help="Ссылка Одноклассники")
+        p.add_argument("--telegram", default=None)
+        p.add_argument("--max", default=None, help="Мессенджер MAX")
+        p.add_argument("--whatsapp", default=None)
+        p.add_argument("--viber", default=None)
+        p.add_argument("--instagram", default=None)
+        # Загранпаспорт
+        p.add_argument("--zagran-number", default=None, dest="zagran_number", help="Серия+номер загранпаспорта")
+        p.add_argument("--zagran-given", default=None, dest="zagran_given", help="Дата выдачи YYYY-MM-DD")
+        p.add_argument("--zagran-expire", default=None, dest="zagran_expire", help="Дата окончания YYYY-MM-DD")
+        p.add_argument("--zagran-org", default=None, dest="zagran_org", help="Орган, выдавший загранпаспорт")
+        # Гражданский паспорт
+        p.add_argument("--passport-number", default=None, dest="passport_number", help="Серия+номер гражданского")
+        p.add_argument("--passport-taken", default=None, dest="passport_taken", help="Кем выдан")
+        p.add_argument("--passport-date", default=None, dest="passport_date", help="Дата выдачи YYYY-MM-DD")
+        p.add_argument("--passport-code", default=None, dest="passport_code", help="Код подразделения")
+        # Свидетельство о рождении
+        p.add_argument("--cert-number", default=None, dest="cert_number", help="Серия+номер свидетельства о рождении")
+        p.add_argument("--cert-given", default=None, dest="cert_given", help="Дата выдачи YYYY-MM-DD")
+        # Юр. лицо
+        p.add_argument("--company", default=None, help="Название компании (для юр.лица)")
+        p.add_argument("--position", default=None, help="Должность (для юр.лица)")
+        p.add_argument("--inn", default=None)
+        p.add_argument("--kpp", default=None)
+        p.add_argument("--ogrn", default=None)
+        # Связи и метки
+        p.add_argument("--nationality-id", type=int, default=None, dest="nationality_id", help="ID страны гражданства")
+        p.add_argument("--office-id", type=int, default=None, dest="office_id")
+        p.add_argument("--manager-id", type=int, default=None, dest="manager_id")
+        p.add_argument("--referrer-id", type=int, default=None, dest="referrer_id",
+                       help="ID туриста, который привёл этого клиента (u_source)")
+        p.add_argument("--labels", default=None, help="Метки через запятую (см. labels list): VIP,Семья,Эконом")
+        # Бонусы
+        p.add_argument("--discount", default=None, help="Скидка клиента")
+        p.add_argument("--bonus-card", default=None, dest="bonus_card", help="Номер бонусной карты")
+        # Прочее
+        p.add_argument("--note", default=None, help="Примечание")
+        p.add_argument("-F", "--field", action="append", help="Доп. поле: -F extended_fields[ID]=value")
+
+    uc = users_sub.add_parser("create", help="Создать туриста / клиента / юр.лицо")
+    _user_args(uc, name_required=True, phone_required=True)
     uc.set_defaults(func=cmd_users_create)
 
-    uu = users_sub.add_parser("update", help="Обновить туриста")
+    uu = users_sub.add_parser("update", help="Обновить любое поле карточки клиента")
     uu.add_argument("id", type=int)
-    uu.add_argument("--name", default=None)
-    uu.add_argument("--surname", default=None)
-    uu.add_argument("--phone", default=None)
-    uu.add_argument("--email", default=None)
-    uu.add_argument("--manager-id", type=int, default=None, dest="manager_id")
-    uu.add_argument("-F", "--field", action="append")
+    _user_args(uu, name_required=False, phone_required=False)
     uu.set_defaults(func=cmd_users_update)
+
+    # labels
+    lb = sub.add_parser("labels", help="Метки клиентов")
+    lb_sub = lb.add_subparsers(dest="sub", required=True)
+    lbl = lb_sub.add_parser("list", help="Список меток (создание/удаление только в UI)")
+    lbl.set_defaults(func=cmd_labels_list)
 
     # payments
     pays = sub.add_parser("payments", help="Платежи")
