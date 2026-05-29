@@ -217,3 +217,53 @@ def test_raw_post(uon):
     body = rec.calls[-1]["body"]
     assert "r_id=42" in body
     assert "type_id=1" in body
+
+
+def test_leads_create_full_card(uon):
+    """Карточка lead с пожеланиями + UTM + соцсетями."""
+    _, rec = uon
+    run_cli([
+        "leads", "create",
+        "--name", "Анна", "--surname", "Тестова", "--phone", "+79992223344",
+        "--email", "anna@test.ru", "--telegram", "@anna",
+        "--countries", "1", "--budget", "200000",
+        "--wish-date-from", "2026-08-01", "--wish-date-to", "2026-08-14",
+        "--nights-from", "10", "--nights-to", "14",
+        "--adults", "2", "--children", "1",
+        "--hotel-types", "4*,5*", "--nutrition", "AI,UAI",
+        "--utm-source", "instagram", "--utm-campaign", "turkey",
+    ], rec)
+    body = rec.calls[-1]["body"]
+    assert "u_name=" in body and "u_phone_mobile=" in body
+    assert "u_telegram=" in body
+    assert "countries=1" in body
+    assert "budget=200000" in body
+    assert "tourist_count=2" in body
+    assert "tourist_child_count=1" in body
+    assert "hotel_types=" in body
+    assert "nutrition=" in body
+    assert "utm_source=instagram" in body
+    assert "utm_campaign=turkey" in body
+
+
+def test_leads_update_status(uon):
+    """leads update двигает по статусам через /request/update с lead_status_id."""
+    _, rec = uon
+    run_cli(["leads", "update", "1", "--status-id", "5"], rec)
+    call = rec.calls[-1]
+    assert call["url"].endswith("/request/update/1.json")
+    assert "lead_status_id=5" in call["body"]
+
+
+def test_leads_update_reason_deny(uon):
+    _, rec = uon
+    run_cli(["leads", "update", "1", "--reason-deny-id", "3"], rec)
+    assert "reason_deny_id=3" in rec.calls[-1]["body"]
+
+
+def test_leads_update_requires_payload(uon):
+    """Без аргументов — должна быть ошибка, не пустой POST."""
+    import pytest as _p
+    _, rec = uon
+    with _p.raises(SystemExit):
+        run_cli(["leads", "update", "1"], rec)

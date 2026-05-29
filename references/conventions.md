@@ -4,6 +4,24 @@
 
 ---
 
+## 0. Lead обновляется через /request/update, а не /lead/update
+
+`POST /lead/update/{id}` **не существует** — отдаёт `404 No route found`. Чтобы двинуть lead по статусам, дёргаем `/request/update/{id}` с полем `lead_status_id`:
+
+```bash
+uon leads update 1 --status-id 5
+# → POST /request/update/1 with lead_status_id=5
+# Lead 1: status_id 1 → 5, status="Принимает решение по оплате"
+```
+
+Если нужно ОБА статуса одновременно (lead + request):
+
+```bash
+uon raw post "request/update/1" -F lead_status_id=5 -F request_status_id=2
+```
+
+Lead и request — отдельные сущности с разными id, но обновляются одним эндпоинтом.
+
 ## 1. Поля create ≠ поля update
 
 Самый частый источник ошибок — в `POST /request/create` и `POST /request/update/{id}` поля называются **по-разному**, хотя относятся к одной сущности.
@@ -34,6 +52,17 @@
 | `description` (в service) | `description` (одинаково) |
 | `price` (в service) | `price` (одинаково) |
 | `name` (в service create) | НЕ принимается — нужно `description` |
+| `countries` (в lead create) | `client_requirements_country_ids` (pipe-формат `\|1\|`) |
+| `budget` (в lead create) | `client_requirements_budget` |
+| `date_from` / `date_to` (lead-wishes) | `client_requirements_date_from` / `_to` |
+| `nights_from` / `nights_to` | `client_requirements_days_from` / `_to` |
+| `tourist_count` | `client_requirements_tourists_adult_count` |
+| `tourist_child_count` | `client_requirements_tourists_child_count` |
+| `hotel_types` (CSV: `4*,5*`) | `client_requirements_hotel_stars` (pipe: `\|4*\|5*\|`) |
+| `nutrition` (CSV: `AI,UAI`) | `client_requirements_nutrition_ids` (pipe: `\|AI\|UAI\|`) |
+| `requirements_note` | `client_requirements_note` |
+| `u_telegram` (в lead) | `telegram` (без `client_` префикса) |
+| `u_whatsapp` (в lead) | `whatsapp` |
 
 ---
 

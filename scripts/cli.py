@@ -47,16 +47,73 @@ def cmd_leads_by_client(args, uon: UonClient) -> None:
 
 def cmd_leads_create(args, uon: UonClient) -> None:
     data = {
+        # Клиент
         "u_name": args.name,
         "u_surname": args.surname,
+        "u_sname": args.patronymic,
         "u_phone_mobile": args.phone,
         "u_email": args.email,
+        "u_telegram": args.telegram,
+        "u_instagram": args.instagram,
+        "u_whatsapp": args.whatsapp,
+        "u_viber": args.viber,
+        "u_social_vk": args.vk,
+        # Бизнес-параметры
+        "source": args.source,
         "source_id": args.source_id,
         "status_id": args.status_id,
-        "manager_id": args.manager_id,
+        "r_u_id": args.manager_id,
+        "r_co_id": args.office_id,
+        "travel_type_id": args.travel_type_id,
+        "touroperator_id": args.touroperator_id,
+        "note": args.note,
+        # Пожелания клиента
+        "countries": args.countries,
+        "date_from": args.wish_date_from,
+        "date_to": args.wish_date_to,
+        "nights_from": args.nights_from,
+        "nights_to": args.nights_to,
+        "tourist_count": args.adults,
+        "tourist_child_count": args.children,
+        "tourist_baby_count": args.babies,
+        "budget": args.budget,
+        "hotel_types": args.hotel_types,
+        "nutrition": args.nutrition,
+        "requirements_note": args.wish_note,
+        # UTM
+        "utm_source": args.utm_source,
+        "utm_medium": args.utm_medium,
+        "utm_campaign": args.utm_campaign,
+        "utm_content": args.utm_content,
+        "utm_term": args.utm_term,
+        # Поведение
+        "ignore_actions_and_reminders": 1 if args.no_auto else None,
         "text": args.text,
     }
+    for kv in args.field or []:
+        k, _, v = kv.partition("=")
+        data[k.strip()] = v.strip()
     dump(uon.post("lead/create", {k: v for k, v in data.items() if v is not None}))
+
+
+def cmd_leads_update(args, uon: UonClient) -> None:
+    """Lead и Request живут в одной таблице по r_id.
+    Обновление идёт через /request/update/{id}, но lead-статус сидит в поле lead_status_id."""
+    data = {
+        "lead_status_id": args.status_id,
+        "manager_id": args.manager_id,
+        "r_cl_id": args.client_id,
+        "source_id": args.source_id,
+        "touroperator_id": args.touroperator_id,
+        "reason_deny_id": args.reason_deny_id,
+    }
+    for kv in args.field or []:
+        k, _, v = kv.partition("=")
+        data[k.strip()] = v.strip()
+    payload = {k: v for k, v in data.items() if v is not None}
+    if not payload:
+        sys.exit("Нечего обновлять — задайте --status-id, --manager-id или -F")
+    dump(uon.post(f"request/update/{args.id}", payload))
 
 
 def cmd_requests_list(args, uon: UonClient) -> None:
@@ -542,16 +599,67 @@ def build_parser() -> argparse.ArgumentParser:
     bc.add_argument("client_id", type=int)
     bc.add_argument("--page", type=int, default=1)
     bc.set_defaults(func=cmd_leads_by_client)
-    cr = leads_sub.add_parser("create", help="Создать обращение")
-    cr.add_argument("--name", required=True)
+    cr = leads_sub.add_parser("create", help="Создать обращение со всеми полями карточки")
+    # Клиент
+    cr.add_argument("--name", required=True, help="Имя клиента")
     cr.add_argument("--surname", default=None)
+    cr.add_argument("--patronymic", default=None, help="Отчество (u_sname)")
     cr.add_argument("--phone", required=True)
     cr.add_argument("--email", default=None)
+    cr.add_argument("--telegram", default=None)
+    cr.add_argument("--instagram", default=None)
+    cr.add_argument("--whatsapp", default=None)
+    cr.add_argument("--viber", default=None)
+    cr.add_argument("--vk", default=None, help="ВКонтакте")
+    # Бизнес
+    cr.add_argument("--source", default=None, help="Источник (строкой). Если есть в кабинете — используй --source-id")
     cr.add_argument("--source-id", type=int, default=None, dest="source_id")
-    cr.add_argument("--status-id", type=int, default=None, dest="status_id")
+    cr.add_argument("--status-id", type=int, default=None, dest="status_id", help="ID lead-статуса (см. statuses leads)")
     cr.add_argument("--manager-id", type=int, default=None, dest="manager_id")
-    cr.add_argument("--text", default=None, help="Текст обращения")
+    cr.add_argument("--office-id", type=int, default=None, dest="office_id")
+    cr.add_argument("--travel-type-id", type=int, default=None, dest="travel_type_id")
+    cr.add_argument("--touroperator-id", type=int, default=None, dest="touroperator_id")
+    cr.add_argument("--note", default=None, help="Примечание для менеджера")
+    cr.add_argument("--text", default=None, help="Текст обращения (что просит клиент)")
+    # Пожелания клиента
+    cr.add_argument("--countries", default=None, help="ID стран через запятую (см. uon raw get countries)")
+    cr.add_argument("--wish-date-from", default=None, dest="wish_date_from", help="Желаемая дата начала YYYY-MM-DD")
+    cr.add_argument("--wish-date-to", default=None, dest="wish_date_to")
+    cr.add_argument("--nights-from", default=None, dest="nights_from")
+    cr.add_argument("--nights-to", default=None, dest="nights_to")
+    cr.add_argument("--adults", default=None, help="Кол-во взрослых (tourist_count)")
+    cr.add_argument("--children", default=None, help="Кол-во детей (tourist_child_count)")
+    cr.add_argument("--babies", default=None, help="Кол-во младенцев (tourist_baby_count)")
+    cr.add_argument("--budget", default=None, help="Бюджет клиента (число)")
+    cr.add_argument("--hotel-types", default=None, dest="hotel_types",
+                    help="Категории отелей через запятую из 1*,2*,3*,4*,5*,5+*,Apts,Villa")
+    cr.add_argument("--nutrition", default=None,
+                    help="Питание через запятую из RO,BB,HB,HB+,FB,FB+,AI,UAI")
+    cr.add_argument("--wish-note", default=None, dest="wish_note", help="Примечание к пожеланиям")
+    # UTM
+    cr.add_argument("--utm-source", default=None, dest="utm_source")
+    cr.add_argument("--utm-medium", default=None, dest="utm_medium")
+    cr.add_argument("--utm-campaign", default=None, dest="utm_campaign")
+    cr.add_argument("--utm-content", default=None, dest="utm_content")
+    cr.add_argument("--utm-term", default=None, dest="utm_term")
+    # Поведение
+    cr.add_argument("--no-auto", action="store_true", dest="no_auto",
+                    help="Не создавать стандартный 'Заполнить данные клиента' напоминание")
+    cr.add_argument("-F", "--field", action="append", help="Доп. поле key=value (extended_fields[N], reason_deny_id, ...)")
     cr.set_defaults(func=cmd_leads_create)
+
+    lup = leads_sub.add_parser("update", help="Обновить обращение / двинуть статус")
+    lup.add_argument("id", type=int)
+    lup.add_argument("--status-id", type=int, default=None, dest="status_id",
+                     help="Новый lead_status_id (см. statuses leads)")
+    lup.add_argument("--manager-id", type=int, default=None, dest="manager_id")
+    lup.add_argument("--client-id", type=int, default=None, dest="client_id")
+    lup.add_argument("--source-id", type=int, default=None, dest="source_id")
+    lup.add_argument("--touroperator-id", type=int, default=None, dest="touroperator_id")
+    lup.add_argument("--reason-deny-id", type=int, default=None, dest="reason_deny_id",
+                     help="ID причины отказа (для перевода в статус 'Отказ')")
+    lup.add_argument("-F", "--field", action="append")
+    lup.set_defaults(func=cmd_leads_update)
 
     # requests
     reqs = sub.add_parser("requests", help="Заявки (request — реальный тур)")
