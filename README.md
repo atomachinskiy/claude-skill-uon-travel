@@ -77,13 +77,12 @@ claude-skill-uon-travel/
 
 ## Roadmap
 
-- [x] MVP: read-only по leads/requests/users/payments/statuses
-- [x] write: create/update заявок, обращений, туристов, напоминаний
-- [x] webhooks: register-скрипты по 69 типам
-- [ ] 4 webhook-receiver-пакета
-- [ ] BI: воронка lead→request→won, выручка по менеджерам
-- [ ] Тесты: записанные фикстуры, замоканный API
-- [ ] Документ: примеры интеграции с Telegram, Google Sheets, Notion
+- [x] **v1.0** MVP read-only + полная write API + bulk-регистрация 69 webhook-типов + 4 receiver-пакета + BI/stats + 7 reference-документов
+- [ ] **v1.1** Расширение: hotels/suppliers/bonuses/avia/insurance CRUD
+- [ ] **v1.2** Записанные фикстуры (replay-tests), CI на GitHub Actions
+- [ ] **v1.3** Примеры интеграций: Sheets, Notion, AmoCRM, Bitrix24
+
+См. [`BACKLOG.md`](BACKLOG.md) для деталей.
 
 ---
 

@@ -193,6 +193,73 @@ uon raw get "company-office"
 uon raw post "service/create" -F r_id=12345 -F type=1 -F price_client=50000
 ```
 
+### Создание заявок
+
+```bash
+uon requests create --name Иван --phone +79991234567 \
+    --date-begin "2026-07-01 00:00:00" --date-end "2026-07-08 00:00:00" \
+    --note "Турция all-inclusive"
+uon requests update 123 --status-id 2   # перевод в "Подтверждена"
+uon requests update 123 -F manager_id=5 # любое поле
+```
+
+### Услуги в заявке
+
+```bash
+uon services types          # справочник типов (1=Отель, 2=Трансфер, ...)
+uon services add --request-id 123 --type 1 \
+    --name "Hilton Resort 5*" --price-client 80000 --price-netto 65000 \
+    --hotel "Hilton" --city "Анталия" --country "Турция" --tourists-count 2
+uon services update 999 --price-client 75000
+uon services delete 999 --confirm
+```
+
+### Платежи
+
+```bash
+uon payments forms          # справочник форм оплаты
+uon payments create --request-id 123 --amount 30000 --form-id 1 --direction in --prepay-id 1
+uon payments update 555 --amount 35000
+uon payments delete 555 --confirm
+```
+
+### Привязка туристов и касания
+
+```bash
+uon tourists-requests add --request-id 123 --tourist-id 678
+uon actions create --request-id 123 --text "Клиент попросил скидку" --type-id 0
+uon deadlines create --request-id 123 --amount 50000 --date "2026-06-15" --current
+```
+
+### Bulk-регистрация всех webhook-ов
+
+```bash
+./scripts/register-all-webhooks.sh https://my-receiver.example.com/
+# Или только нужные:
+./scripts/register-all-webhooks.sh https://my-receiver.example.com/ --types 2,9,17,40,59
+```
+
+### Webhook receivers — выбрать стек
+
+| Стек | Когда | Деплой |
+|------|-------|--------|
+| `webhook-receivers/cloudflare-worker/` | Без VPS, ≤ 100k req/день, нужно хранение + форвард | `wrangler deploy` |
+| `webhook-receivers/fastapi/` | Свой VPS, история в SQLite, аналитика, без лимитов | `docker compose up -d` |
+| `webhook-receivers/n8n/` | Есть n8n, нужно роутить события в разные сервисы | Импорт JSON-шаблона |
+| `webhook-receivers/telegram-bridge/` | Один турагент, уведомления в личный TG, без серверов | `wrangler deploy` |
+
+### BI / аналитика
+
+```bash
+python3 scripts/stats.py funnel --from 2026-05-01 --to 2026-05-31 --by-source
+python3 scripts/stats.py revenue --from 2026-05-01 --to 2026-05-31 --group manager
+python3 scripts/stats.py avg-check --from 2026-05-01 --to 2026-05-31
+python3 scripts/stats.py cycle --from 2026-01-01 --to 2026-05-31     # время от lead до won
+python3 scripts/stats.py churn --from 2026-05-01 --to 2026-05-31     # причины отказа
+python3 scripts/stats.py overdue --from 2026-01-01 --to 2026-05-29   # просроченные
+python3 scripts/stats.py html-report --from 2026-05-01 --to 2026-05-31 -o report.html
+```
+
 ---
 
 ## ОБЫЧНЫЕ ОШИБКИ

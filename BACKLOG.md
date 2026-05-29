@@ -1,63 +1,58 @@
 # Backlog
 
-## v0.2 (write API + extended sub-CRUD)
+## ✅ v1.0 — выпущен 2026-05-29
 
-- [ ] `requests create` — создание заявки с туристом и услугой за один вызов
-- [ ] `requests update` — смена статуса/менеджера/цены
-- [ ] `services create/update/delete` — управление услугами внутри заявки (отель, авиа, страховка, питание, виза)
-- [ ] `payments create/update/delete` — приходы/возвраты
-- [ ] `paydocs create/delete` — счета к платежам
-- [ ] `tourists-requests create/delete` — привязка туристов к заявке
-- [ ] `request-action create` — касания внутри заявки
-- [ ] `request-deadline create/delete` — дедлайны оплаты
-- [ ] `request-file create/delete` — файлы заявки
-- [ ] `user/update` — обновление туриста
-- [ ] `user-file create` — файлы карточки туриста
+См. [CHANGELOG.md](CHANGELOG.md).
 
-## v0.3 (webhooks)
+## v1.1 — дополнительные ресурсы (приоритет: средний)
 
-- [ ] `register-all-webhooks.sh` — массовая регистрация 69 типов на один URL с фильтрами
-- [ ] Cloudflare Worker receiver (TypeScript)
-- [ ] FastAPI receiver (Python, Docker)
-- [ ] n8n template (JSON export для импорта)
-- [ ] Telegram-bridge receiver (Bun, serverless)
-- [ ] HMAC-валидация (если U-On добавит signed webhooks)
+- [ ] `hotels create/update/delete` — управление каталогом отелей
+- [ ] `suppliers create/update` — поставщики/туроператоры/ОЦ
+- [ ] `bcard create/activate` + `bonuses create` — бонусные карты и баллы
+- [ ] `avia create` — детальная разбивка авиаперелётов внутри услуги
+- [ ] `mail create` / SMS — отправка писем/SMS вручную
+- [ ] `chat-message create` — сообщения в чате CRM
+- [ ] `catalog-package` / `catalog-service` — для туроператоров на схеме «Я-оператор»
+- [ ] `call_history create` — интеграция с телефонией (CallTracking)
+- [ ] `notification create` — всплывающие в кабинете менеджеров
 
-## v0.4 (BI / analytics)
+## v1.2 — Тестирование и CI
 
-- [ ] `stats funnel` — lead → request → won по периоду и источнику
-- [ ] `stats revenue` — выручка по менеджерам/офисам
-- [ ] `stats avg-cycle` — среднее время от lead до won
-- [ ] `stats churn` — причины отказа (top-N по `reason_deny`)
-- [ ] `stats payments-overdue` — просроченные платежи
-- [ ] HTML-отчёт по шаблону `offer.html` (beige paper, Inter, табы)
+- [ ] Записанные фикстуры (VCR-style) для replay-тестов без live API
+- [ ] Pytest-сюита с фикстурами по каждой команде
+- [ ] Smoke-test cycle: lead → request → service → payment → close, на чистом triale
+- [ ] GitHub Actions workflow: lint (ruff/shellcheck) + replay-tests + dry-run register-all
+- [ ] Coverage badge
+- [ ] Pre-commit hooks
 
-## v0.5 (доп. ресурсы)
+## v1.3 — Примеры интеграций
 
-- [ ] `hotels create/update/delete` — отели
-- [ ] `suppliers create/update` — поставщики/туроператоры
-- [ ] `bonuses` — начисление/списание баллов
-- [ ] `bcard create/activate` — бонусные карты
-- [ ] `avia/insurance/visa/nutrition` — справочники услуг
-- [ ] `mail/sms` — отправка писем и SMS вручную
-- [ ] `catalog-package` / `catalog-service` — для туроператоров на схеме "Я-оператор"
-- [ ] `chat-message` — отправка сообщений в чат CRM
+- [ ] `examples/sheets-sync/` — Google Sheets sync (через `google-sheets-skill` + cron)
+- [ ] `examples/notion-leads/` — каждый lead → новая страница в Notion базе
+- [ ] `examples/amocrm-bridge/` — двусторонняя синхронизация U-On ↔ amoCRM
+- [ ] `examples/bitrix24-bridge/` — то же для Bitrix24
+- [ ] `examples/tochka-payment/` — заявка → платёжная ссылка Точки → автозакрытие на оплате
+- [ ] `examples/telegram-lead-from-bot/` — TG-бот собирает заявку → создаёт lead
 
-## Тестирование
+## v1.4 — Polish
 
-- [ ] Записанные фикстуры (replay-tests для CI без live API)
-- [ ] Smoke-тест против реального кабинета (только GET)
-- [ ] CI на GitHub Actions
+- [ ] HMAC-валидация webhook-ов (если U-On добавит подпись — пока их нет)
+- [ ] Pretty-print таблиц в CLI вместо JSON-дампа (опционально через `--format table`)
+- [ ] Прогресс-бар для долгих BI-выгрузок
+- [ ] Кэширование статусов/менеджеров/источников в локальном файле (TTL 1 час)
+- [ ] CLI completion для bash/zsh/fish
 
-## Документация
+## Идеи на потом
 
-- [ ] `references/lifecycle.md` — диаграмма Lead → Request → Service → Payment → Document
-- [ ] `references/conventions.md` — формат дат, пагинация, кодировка, что возвращает `{_format}`
-- [ ] `examples/` — готовые рецепты: «новая заявка из Telegram», «синк в Sheets», «уведомление об оплате в Notion»
+- [ ] AI-режим: `uon assistant` — REPL-сессия, естественный язык → CLI-команды
+- [ ] Веб-интерфейс для невладельцев CLI (Streamlit/Gradio)
+- [ ] Telegram-бот для турагента (CRUD заявок прямо из чата)
+- [ ] Превратить в **MCP-сервер** для прямого подключения к Claude Desktop
+- [ ] Публикация на PyPI (`pip install claude-skill-uon-travel`)
+- [ ] Перевод документации на английский
 
-## Публикация
+## Не делаем
 
-- [ ] Создать публичный репо `atomachinskiy/claude-skill-uon-travel`
-- [ ] CHANGELOG.md
-- [ ] Скриншоты использования в Claude Code
-- [ ] Возможный пост на Хабр / в TG-канал
+- Полноценный фронтенд для CRM (это работа U-On)
+- ETL в data warehouse (это работа отдельных pipeline-ов, не скилла)
+- Замена самого U-On (мы только адаптер к их API)
