@@ -357,3 +357,203 @@ def test_extended_field_via_minus_F(uon):
     # urlencoded: extended_fields[199888] становится %5B...%5D
     assert "extended_fields" in body
     assert "199888" in body
+
+
+# v1.3: новые команды
+
+def test_reminders_list(uon):
+    _, rec = uon
+    run_cli(["reminders", "list", "--page", "2"], rec)
+    assert rec.calls[-1]["url"].endswith("/reminder/2.json")
+
+
+def test_reminders_close(uon):
+    _, rec = uon
+    run_cli(["reminders", "close", "6", "--done-by", "2"], rec)
+    call = rec.calls[-1]
+    assert call["url"].endswith("/reminder/close/6.json")
+    assert "done_u_id=2" in call["body"]
+    assert "done_datetime=" in call["body"]
+
+
+def test_reminders_by_request(uon):
+    _, rec = uon
+    run_cli(["reminders", "by-request", "8"], rec)
+    assert rec.calls[-1]["url"].endswith("/reminder/8.json")
+
+
+def test_paydocs_list(uon):
+    _, rec = uon
+    run_cli(["paydocs", "list", "--from", "2026-05-01", "--to", "2026-05-29"], rec)
+    assert "/paydoc/list/2026-05-01/2026-05-29/1.json" in rec.calls[-1]["url"]
+
+
+def test_paydocs_update(uon):
+    _, rec = uon
+    run_cli(["paydocs", "update", "5", "--amount", "50000"], rec)
+    assert rec.calls[-1]["url"].endswith("/paydoc/update/5.json")
+    assert "summa=50000" in rec.calls[-1]["body"]
+
+
+def test_request_files_attach(uon):
+    _, rec = uon
+    run_cli([
+        "request-files", "attach", "--request-id", "8",
+        "--name", "Договор.pdf", "--url", "https://example.com/c.pdf",
+        "--private",
+    ], rec)
+    body = rec.calls[-1]["body"]
+    assert "r_id=8" in body
+    assert "file_name=" in body
+    assert "file_url=" in body
+    assert "file_is_private=1" in body
+
+
+def test_user_files_attach(uon):
+    _, rec = uon
+    run_cli([
+        "user-files", "attach", "--tourist-id", "8",
+        "--name", "Паспорт.jpg", "--url", "https://example.com/p.jpg",
+    ], rec)
+    body = rec.calls[-1]["body"]
+    assert "u_id=8" in body
+    assert "filename=" in body
+    assert "name=" in body
+
+
+def test_webhook_update(uon):
+    _, rec = uon
+    run_cli([
+        "webhooks", "update", "100",
+        "--url", "https://new.example.com/wh", "--method", "POST",
+    ], rec)
+    assert rec.calls[-1]["url"].endswith("/webhook/update/100.json")
+    assert "url=" in rec.calls[-1]["body"]
+    assert "method=POST" in rec.calls[-1]["body"]
+
+
+def test_manager_create(uon):
+    _, rec = uon
+    run_cli([
+        "managers", "create",
+        "--name", "Алексей", "--email", "alex@agency.com",
+        "--password", "secure1234", "--company-id", "1",
+    ], rec)
+    body = rec.calls[-1]["body"]
+    assert "u_email=" in body
+    assert "u_password=" in body
+    assert "u_company_id=1" in body
+    assert "u_gr_id=2" in body  # фиксированная роль менеджера
+
+
+def test_document_generate(uon):
+    _, rec = uon
+    run_cli([
+        "documents", "generate",
+        "--template-id", "5", "--request-id", "8",
+        "--with-sign", "--format", "pdf",
+    ], rec)
+    body = rec.calls[-1]["body"]
+    assert "template_id=5" in body
+    assert "request_id=8" in body
+    assert "print_and_sign=1" in body
+    assert "format=pdf" in body
+    assert "locale=ru" in body
+
+
+def test_bcards_create(uon):
+    _, rec = uon
+    run_cli(["bcards", "create", "--number", "BC-001", "--tourist-id", "5", "--bonuses", "1000"], rec)
+    body = rec.calls[-1]["body"]
+    assert "number=BC-001" in body
+    assert "user_id=5" in body
+    assert "bonuses=1000" in body
+
+
+def test_bcards_bonus_add(uon):
+    _, rec = uon
+    run_cli(["bcards", "bonus", "--card-id", "3", "--amount", "500", "--add"], rec)
+    body = rec.calls[-1]["body"]
+    assert "bc_id=3" in body
+    assert "type=1" in body  # 1 = начислить
+    assert "bonuses=500" in body
+
+
+def test_bcards_bonus_debit(uon):
+    _, rec = uon
+    run_cli(["bcards", "bonus", "--card-id", "3", "--amount", "200", "--debit"], rec)
+    assert "type=2" in rec.calls[-1]["body"]  # 2 = списать
+
+
+def test_mail_send(uon):
+    _, rec = uon
+    run_cli(["mail", "send", "--to", "a@b.com", "--from", "m@a.ru",
+             "--subject", "Тур", "--text", "Привет"], rec)
+    body = rec.calls[-1]["body"]
+    assert "email_to=" in body and "email_from=" in body
+    assert "subject=" in body and "text=" in body
+
+
+def test_notifications_create(uon):
+    _, rec = uon
+    run_cli(["notifications", "create", "--manager-id", "2",
+             "--text", "У клиента вопрос", "--request-id", "8"], rec)
+    body = rec.calls[-1]["body"]
+    assert "manager_id=2" in body
+    assert "request_id=8" in body
+
+
+def test_cash_create(uon):
+    _, rec = uon
+    run_cli(["cash", "create", "--name", "Касса терминала"], rec)
+    assert rec.calls[-1]["url"].endswith("/cash/create.json")
+    assert "name=" in rec.calls[-1]["body"]
+
+
+def test_service_price_create(uon):
+    _, rec = uon
+    run_cli([
+        "service-price", "create", "--service-id", "5",
+        "--date-begin", "2026-07-01 00:00:00", "--date-end", "2026-07-31 00:00:00",
+        "--nights", "7", "--price-adult", "5000", "--netto-adult", "4000",
+    ], rec)
+    body = rec.calls[-1]["body"]
+    assert "sr_id=5" in body
+    assert "nights=7" in body
+    assert "price=5000" in body
+    assert "price_netto=4000" in body
+
+
+def test_user_cabinet_create(uon):
+    _, rec = uon
+    run_cli(["user-cabinet", "create", "--tourist-id", "8"], rec)
+    assert rec.calls[-1]["url"].endswith("/user-cabinet/create.json")
+    assert "u_id=8" in rec.calls[-1]["body"]
+
+
+def test_sources_create_uses_rs_name(uon):
+    """source/create требует поле rs_name, НЕ name."""
+    _, rec = uon
+    run_cli(["sources", "create", "--name", "TikTok"], rec)
+    body = rec.calls[-1]["body"]
+    assert "rs_name=TikTok" in body
+    assert "name=TikTok" not in body or "rs_name=TikTok" in body
+
+
+def test_countries_create(uon):
+    _, rec = uon
+    run_cli(["countries", "create", "--name", "Кения"], rec)
+    assert rec.calls[-1]["url"].endswith("/country/create.json")
+    assert "name=" in rec.calls[-1]["body"]
+
+
+def test_cities_list_by_country(uon):
+    _, rec = uon
+    run_cli(["cities", "list", "1"], rec)
+    assert rec.calls[-1]["url"].endswith("/cities/1.json")
+
+
+def test_supplier_type_create(uon):
+    _, rec = uon
+    run_cli(["suppliers", "type-create", "--name", "Гид-сопровождение"], rec)
+    assert rec.calls[-1]["url"].endswith("/supplier_type/create.json")

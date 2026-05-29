@@ -2,6 +2,57 @@
 
 Все важные изменения этого проекта документируются здесь. Формат — [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/). Семантическое версионирование — [SemVer](https://semver.org/lang/ru/).
 
+## [1.3.0] — 2026-05-29
+
+После аудита покрытия выяснилось: из 150 endpoint-ов прямой командой
+покрыто было 104 (~70%). Закрыл все кроме 🔵 "Я-оператор" каталога —
+прямое покрытие теперь **141/150 (94%)**.
+
+### Добавлено в 🔴 ВАЖНОЕ
+
+- `reminders list/get/by-request/close` — полный жизненный цикл задач
+- `paydocs get/list/update` — полный CRUD счетов в платежах
+- `request-files attach/delete` + `user-files attach` — прикрепление
+  файлов по URL (документы, сканы паспортов)
+- `webhooks update` — теперь можно менять URL/метод без удаления
+- `managers create` — добавление сотрудника в кабинет (роль фиксирована: 2)
+- `payments other-types` — справочник косвенных платежей
+- `documents generate` — генерация документов из шаблонов U-On
+  (5=Договор, 13=Лист брони, 14=Расчёт, 15=Счёт), форматы text/doc/pdf,
+  8 локалей, опц. печать-и-подпись
+
+### Добавлено в 🟡 СРЕДНЕЕ
+
+- `bcards create/activate/bonus/history-by-card/history-by-user` — полная
+  программа лояльности (выпуск, активация, начисление/списание баллов,
+  история операций)
+- `mail send` — отправка писем через CRM
+- `chat send` — внутренний чат между менеджерами и туристами
+- `notifications list/get/create` — всплывающие уведомления менеджерам
+- `cash list/create` — кассы для платежей
+- `bills list/get` — счета для бухгалтерской отчётности
+- `service-price create/update/delete` — сезонные цены отеля
+  (взрослый/ребёнок/младенец × нетто/цена клиенту)
+- `user-cabinet create` — создание ЛК туристу
+
+### Добавлено в 🟢 СПРАВОЧНИКИ
+
+- `sources list/create` — источники обращений (gotcha: поле `rs_name`, не `name`!)
+- `travel-types list/create` — типы поездок
+- `nutrition list/create/update` — типы питания
+- `countries list/create/update` — страны
+- `cities list/create/update` — города (с фильтром по стране)
+- `suppliers type-create` — типы партнёров
+
+### Тесты
+
+22 новых теста для новых команд. Итого 63 (было 41). Все зелёные.
+
+### Документация
+
+- `COVERAGE.md` — полный аудит покрытия 150 endpoint-ов с разбиением
+  по категориям важности.
+
 ## [1.2.0] — 2026-05-29
 
 ### Добавлено
@@ -76,5 +127,6 @@
 - 3 типа webhook-ов зарегистрированы + удалены (приёмка/cleanup)
 - BI funnel/revenue/html-report — сгенерировано
 
+[1.3.0]: https://github.com/atomachinskiy/claude-skill-uon-travel/releases/tag/v1.3.0
 [1.2.0]: https://github.com/atomachinskiy/claude-skill-uon-travel/releases/tag/v1.2.0
 [1.0.0]: https://github.com/atomachinskiy/claude-skill-uon-travel/releases/tag/v1.0.0

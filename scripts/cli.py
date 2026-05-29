@@ -340,6 +340,27 @@ def cmd_payments_forms(args, uon: UonClient) -> None:
     dump(uon.get("payment_form"))
 
 
+def cmd_paydocs_get(args, uon: UonClient) -> None:
+    dump(uon.get(f"paydoc/{args.id}"))
+
+
+def cmd_paydocs_list(args, uon: UonClient) -> None:
+    ep = f"paydoc/list/{args.date_from}/{args.date_to}/{args.page}"
+    dump(uon.get(ep))
+
+
+def cmd_paydocs_update(args, uon: UonClient) -> None:
+    data = {k: v for k, v in {
+        "doc_number": args.number, "doc_date": args.date, "summa": args.amount,
+    }.items() if v is not None}
+    for kv in args.field or []:
+        k, _, v = kv.partition("=")
+        data[k.strip()] = v.strip()
+    if not data:
+        sys.exit("Нечего обновлять")
+    dump(uon.post(f"paydoc/update/{args.id}", data))
+
+
 def cmd_paydocs_create(args, uon: UonClient) -> None:
     data = {
         "payment_id": args.payment_id,
@@ -406,6 +427,203 @@ def cmd_services_delete(args, uon: UonClient) -> None:
 
 def cmd_services_types(args, uon: UonClient) -> None:
     dump(uon.get("service_type"))
+
+
+def cmd_bcards_create(args, uon: UonClient) -> None:
+    data = {
+        "number": args.number, "bonuses": args.bonuses,
+        "user_id": args.tourist_id, "manager_id": args.manager_id,
+        "active": 0 if args.inactive else None,
+    }
+    dump(uon.post("bcard/create", {k: v for k, v in data.items() if v is not None}))
+
+
+def cmd_bcards_activate(args, uon: UonClient) -> None:
+    dump(uon.post("bcard-activate/create", {"bc_number": args.number, "user_id": args.tourist_id}))
+
+
+def cmd_bcards_bonus(args, uon: UonClient) -> None:
+    import datetime as _dt
+    op_type = 1 if args.add else 2
+    data = {
+        "bc_id": args.card_id,
+        "datetime": args.datetime or _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "type": op_type,
+        "bonuses": args.amount,
+        "manager_id": args.manager_id,
+        "reason": args.reason,
+        "till_date": args.till,
+    }
+    dump(uon.post("bcard-bonus/create", {k: v for k, v in data.items() if v is not None}))
+
+
+def cmd_bcards_bonus_by_card(args, uon: UonClient) -> None:
+    dump(uon.get(f"bcard-bonus-by-card/{args.card_id}"))
+
+
+def cmd_bcards_bonus_by_user(args, uon: UonClient) -> None:
+    dump(uon.get(f"bcard-bonus-by-user/{args.tourist_id}"))
+
+
+def cmd_mail_send(args, uon: UonClient) -> None:
+    data = {
+        "email_to": args.to, "email_from": args.from_,
+        "subject": args.subject, "text": args.text,
+        "datetime": args.datetime,
+    }
+    dump(uon.post("mail/create", {k: v for k, v in data.items() if v is not None}))
+
+
+def cmd_chat_send(args, uon: UonClient) -> None:
+    dump(uon.post("chat-message/create", {
+        "user_id_from": args.from_id, "user_id_to": args.to_id, "text": args.text,
+    }))
+
+
+def cmd_notifications_list(args, uon: UonClient) -> None:
+    dump(uon.get(f"notifications/{args.page}"))
+
+
+def cmd_notifications_get(args, uon: UonClient) -> None:
+    dump(uon.get(f"notification/{args.id}"))
+
+
+def cmd_notifications_create(args, uon: UonClient) -> None:
+    data = {
+        "manager_id": args.manager_id, "text": args.text,
+        "type": args.type, "request_id": args.request_id,
+        "tourist_id": args.tourist_id,
+    }
+    dump(uon.post("notification/create", {k: v for k, v in data.items() if v is not None}))
+
+
+def cmd_cash_list(args, uon: UonClient) -> None:
+    dump(uon.get("cash"))
+
+
+def cmd_cash_create(args, uon: UonClient) -> None:
+    dump(uon.post("cash/create", {"name": args.name}))
+
+
+def cmd_bills_get(args, uon: UonClient) -> None:
+    dump(uon.get(f"bill/{args.id}"))
+
+
+def cmd_bills_list(args, uon: UonClient) -> None:
+    dump(uon.get(f"bills/{args.page}"))
+
+
+def cmd_service_price_create(args, uon: UonClient) -> None:
+    data = {
+        "sr_id": args.service_id,
+        "datetime_begin": args.date_begin, "datetime_end": args.date_end,
+        "nights": args.nights,
+        "price_netto": args.netto_adult, "price_netto_child": args.netto_child, "price_netto_baby": args.netto_baby,
+        "price": args.price_adult, "price_child": args.price_child, "price_baby": args.price_baby,
+    }
+    dump(uon.post("service-price/create", {k: v for k, v in data.items() if v is not None}))
+
+
+def cmd_service_price_update(args, uon: UonClient) -> None:
+    data = {k: v for k, v in {
+        "datetime_begin": args.date_begin, "datetime_end": args.date_end,
+        "nights": args.nights,
+        "price_netto": args.netto_adult, "price": args.price_adult,
+        "price_netto_child": args.netto_child, "price_child": args.price_child,
+        "price_netto_baby": args.netto_baby, "price_baby": args.price_baby,
+    }.items() if v is not None}
+    if not data:
+        sys.exit("Нечего обновлять")
+    dump(uon.post(f"service-price/update/{args.id}", data))
+
+
+def cmd_service_price_delete(args, uon: UonClient) -> None:
+    if not args.confirm:
+        sys.exit("Опасная операция. --confirm")
+    dump(uon.post("service-price/delete", {"id": args.id}))
+
+
+def cmd_user_cabinet_create(args, uon: UonClient) -> None:
+    dump(uon.post("user-cabinet/create", {"u_id": args.tourist_id}))
+
+
+def cmd_request_file_attach(args, uon: UonClient) -> None:
+    data = {
+        "r_id": args.request_id,
+        "file_name": args.name,
+        "file_url": args.url,
+        "file_note": args.note,
+        "file_is_private": 1 if args.private else None,
+    }
+    dump(uon.post("request-file/create", {k: v for k, v in data.items() if v is not None}))
+
+
+def cmd_request_file_delete(args, uon: UonClient) -> None:
+    if not args.confirm:
+        sys.exit("Опасная операция. --confirm")
+    dump(uon.post(f"request-file/delete/{args.id}", {}))
+
+
+def cmd_user_file_attach(args, uon: UonClient) -> None:
+    data = {
+        "u_id": args.tourist_id,
+        "filename": args.name,
+        "name": args.url,
+        "file_note": args.note,
+    }
+    dump(uon.post("user-file/create", {k: v for k, v in data.items() if v is not None}))
+
+
+def cmd_webhook_update(args, uon: UonClient) -> None:
+    data = {k: v for k, v in {
+        "type_id": args.type, "url": args.url, "method": args.method, "note": args.note,
+    }.items() if v is not None}
+    if not data:
+        sys.exit("Нечего обновлять")
+    dump(uon.post(f"webhook/update/{args.id}", data))
+
+
+def cmd_manager_create(args, uon: UonClient) -> None:
+    data = {
+        "u_name": args.name,
+        "u_surname": args.surname,
+        "u_sname": args.patronymic,
+        "u_email": args.email,
+        "u_password": args.password,
+        "u_phone_mobile": args.phone,
+        "u_company_id": args.company_id,
+        "u_office_id": args.office_id,
+        "u_gr_id": 2,
+        "u_birthday": args.birthday,
+        "u_note": args.note,
+    }
+    for kv in args.field or []:
+        k, _, v = kv.partition("=")
+        data[k.strip()] = v.strip()
+    dump(uon.post("manager/create", {k: v for k, v in data.items() if v is not None}))
+
+
+def cmd_payment_other_types(args, uon: UonClient) -> None:
+    dump(uon.get("payment_other_type"))
+
+
+def cmd_document_generate(args, uon: UonClient) -> None:
+    data = {
+        "template_id": args.template_id,
+        "request_id": args.request_id,
+        "bill_id": args.bill_id,
+        "supplier_id": args.supplier_id,
+        "tourist_id": args.tourist_id,
+        "print_and_sign": 1 if args.with_sign else None,
+        "date": args.date,
+        "format": args.format,
+        "locale": args.locale,
+        "is_custom": 1 if args.custom else None,
+    }
+    for kv in args.field or []:
+        k, _, v = kv.partition("=")
+        data[k.strip()] = v.strip()
+    dump(uon.post("request-document", {k: v for k, v in data.items() if v is not None}))
 
 
 def cmd_tourists_add(args, uon: UonClient) -> None:
@@ -478,6 +696,59 @@ def cmd_sources_list(args, uon: UonClient) -> None:
     dump(uon.get("source"))
 
 
+def cmd_sources_create(args, uon: UonClient) -> None:
+    dump(uon.post("source/create", {"rs_name": args.name}))
+
+
+def cmd_travel_types_list(args, uon: UonClient) -> None:
+    dump(uon.get("travel-type"))
+
+
+def cmd_travel_types_create(args, uon: UonClient) -> None:
+    dump(uon.post("travel-type/create", {"name": args.name}))
+
+
+def cmd_nutrition_list(args, uon: UonClient) -> None:
+    dump(uon.get("nutrition"))
+
+
+def cmd_nutrition_create(args, uon: UonClient) -> None:
+    dump(uon.post("nutrition/create", {"name": args.name}))
+
+
+def cmd_nutrition_update(args, uon: UonClient) -> None:
+    dump(uon.post(f"nutrition/update/{args.id}", {"name": args.name}))
+
+
+def cmd_countries_list(args, uon: UonClient) -> None:
+    dump(uon.get("countries"))
+
+
+def cmd_countries_create(args, uon: UonClient) -> None:
+    dump(uon.post("country/create", {"name": args.name}))
+
+
+def cmd_countries_update(args, uon: UonClient) -> None:
+    dump(uon.post(f"country/update/{args.id}", {"name": args.name}))
+
+
+def cmd_cities_list(args, uon: UonClient) -> None:
+    ep = f"cities/{args.country_id}/{args.page}" if args.page > 1 else f"cities/{args.country_id}"
+    dump(uon.get(ep))
+
+
+def cmd_cities_create(args, uon: UonClient) -> None:
+    dump(uon.post("city/create", {"name": args.name, "country_id": args.country_id}))
+
+
+def cmd_cities_update(args, uon: UonClient) -> None:
+    dump(uon.post(f"city/update/{args.id}", {"name": args.name}))
+
+
+def cmd_supplier_type_create(args, uon: UonClient) -> None:
+    dump(uon.post("supplier_type/create", {"name": args.name}))
+
+
 def cmd_webhooks_list(args, uon: UonClient) -> None:
     dump(uon.get(f"webhook/{args.page}"))
 
@@ -488,6 +759,28 @@ def cmd_webhooks_create(args, uon: UonClient) -> None:
 
 def cmd_webhooks_delete(args, uon: UonClient) -> None:
     dump(uon.post(f"webhook/delete/{args.id}", {}))
+
+
+def cmd_reminders_list(args, uon: UonClient) -> None:
+    dump(uon.get(f"reminder/{args.page}"))
+
+
+def cmd_reminders_get(args, uon: UonClient) -> None:
+    dump(uon.get(f"reminder-one/{args.id}"))
+
+
+def cmd_reminders_by_request(args, uon: UonClient) -> None:
+    dump(uon.get(f"reminder/{args.request_id}"))
+
+
+def cmd_reminders_close(args, uon: UonClient) -> None:
+    import datetime as _dt
+    data = {
+        "done_u_id": args.done_by,
+        "done_datetime": args.done_at or _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    payload = {k: v for k, v in data.items() if v is not None}
+    dump(uon.post(f"reminder/close/{args.id}", payload))
 
 
 def cmd_reminders_create(args, uon: UonClient) -> None:
@@ -935,6 +1228,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     pf = pays_sub.add_parser("forms", help="Список форм оплаты (наличные, картой, банк, СБП...)")
     pf.set_defaults(func=cmd_payments_forms)
+    pot = pays_sub.add_parser("other-types", help="Типы косвенных платежей (списания/комиссии)")
+    pot.set_defaults(func=cmd_payment_other_types)
 
     # paydocs
     pd = sub.add_parser("paydocs", help="Счета (paydoc) внутри платежей")
@@ -950,6 +1245,21 @@ def build_parser() -> argparse.ArgumentParser:
     pdd.add_argument("id", type=int)
     pdd.add_argument("--confirm", action="store_true")
     pdd.set_defaults(func=cmd_paydocs_delete)
+    pdg = pd_sub.add_parser("get", help="Счёт по id")
+    pdg.add_argument("id", type=int)
+    pdg.set_defaults(func=cmd_paydocs_get)
+    pdl = pd_sub.add_parser("list", help="Список счетов за период")
+    pdl.add_argument("--from", required=True, dest="date_from")
+    pdl.add_argument("--to", required=True, dest="date_to")
+    pdl.add_argument("--page", type=int, default=1)
+    pdl.set_defaults(func=cmd_paydocs_list)
+    pdu = pd_sub.add_parser("update", help="Обновить счёт")
+    pdu.add_argument("id", type=int)
+    pdu.add_argument("--number", default=None)
+    pdu.add_argument("--date", default=None)
+    pdu.add_argument("--amount", default=None)
+    pdu.add_argument("-F", "--field", action="append")
+    pdu.set_defaults(func=cmd_paydocs_update)
 
     # services (внутри заявки)
     svc = sub.add_parser("services", help="Услуги в заявке (отель, авиа, страховка, виза, питание, трансфер)")
@@ -986,6 +1296,159 @@ def build_parser() -> argparse.ArgumentParser:
     st_ = svc_sub.add_parser("types", help="Список типов услуг")
     st_.set_defaults(func=cmd_services_types)
 
+    # bcards (bonus cards)
+    bc = sub.add_parser("bcards", help="Бонусные карты (программа лояльности)")
+    bc_sub = bc.add_subparsers(dest="sub", required=True)
+    bcc = bc_sub.add_parser("create", help="Выпустить карту")
+    bcc.add_argument("--number", required=True)
+    bcc.add_argument("--tourist-id", type=int, default=None, dest="tourist_id")
+    bcc.add_argument("--bonuses", default=None, help="Начальные баллы")
+    bcc.add_argument("--manager-id", type=int, default=None, dest="manager_id")
+    bcc.add_argument("--inactive", action="store_true", help="Создать неактивной")
+    bcc.set_defaults(func=cmd_bcards_create)
+    bca = bc_sub.add_parser("activate", help="Активировать карту для клиента")
+    bca.add_argument("--number", required=True)
+    bca.add_argument("--tourist-id", type=int, required=True, dest="tourist_id")
+    bca.set_defaults(func=cmd_bcards_activate)
+    bcb = bc_sub.add_parser("bonus", help="Начислить/списать баллы")
+    bcb.add_argument("--card-id", type=int, required=True, dest="card_id")
+    bcb.add_argument("--amount", required=True, help="Количество баллов")
+    bcb.add_argument("--add", action="store_true", help="Начислить (default — добавить)")
+    bcb.add_argument("--debit", action="store_true", help="Списать (включает --add=false)")
+    bcb.add_argument("--datetime", default=None)
+    bcb.add_argument("--manager-id", type=int, default=None, dest="manager_id")
+    bcb.add_argument("--reason", default=None)
+    bcb.add_argument("--till", default=None, help="До какой даты действуют YYYY-MM-DD")
+    bcb.set_defaults(func=cmd_bcards_bonus)
+    bcbc = bc_sub.add_parser("history-by-card", help="История бонусов по карте")
+    bcbc.add_argument("card_id", type=int)
+    bcbc.set_defaults(func=cmd_bcards_bonus_by_card)
+    bcbu = bc_sub.add_parser("history-by-user", help="История бонусов по клиенту")
+    bcbu.add_argument("tourist_id", type=int)
+    bcbu.set_defaults(func=cmd_bcards_bonus_by_user)
+
+    # mail
+    ml_ = sub.add_parser("mail", help="Письма")
+    ml_sub = ml_.add_subparsers(dest="sub", required=True)
+    mls = ml_sub.add_parser("send", help="Отправить письмо")
+    mls.add_argument("--to", required=True)
+    mls.add_argument("--from", required=True, dest="from_")
+    mls.add_argument("--subject", required=True)
+    mls.add_argument("--text", required=True)
+    mls.add_argument("--datetime", default=None)
+    mls.set_defaults(func=cmd_mail_send)
+
+    # chat (внутренний)
+    ch = sub.add_parser("chat", help="Внутренний чат CRM")
+    ch_sub = ch.add_subparsers(dest="sub", required=True)
+    chs = ch_sub.add_parser("send", help="Отправить сообщение")
+    chs.add_argument("--from-id", type=int, required=True, dest="from_id")
+    chs.add_argument("--to-id", type=int, required=True, dest="to_id")
+    chs.add_argument("--text", required=True)
+    chs.set_defaults(func=cmd_chat_send)
+
+    # notifications
+    nt = sub.add_parser("notifications", help="Уведомления менеджерам в кабинете")
+    nt_sub = nt.add_subparsers(dest="sub", required=True)
+    ntl = nt_sub.add_parser("list", help="Список уведомлений")
+    ntl.add_argument("--page", type=int, default=1)
+    ntl.set_defaults(func=cmd_notifications_list)
+    ntg = nt_sub.add_parser("get", help="Уведомление по id")
+    ntg.add_argument("id", type=int)
+    ntg.set_defaults(func=cmd_notifications_get)
+    ntc = nt_sub.add_parser("create", help="Создать уведомление менеджеру")
+    ntc.add_argument("--manager-id", required=True, dest="manager_id", help="ID или IDs через запятую")
+    ntc.add_argument("--text", required=True)
+    ntc.add_argument("--type", default=None, choices=["vk", "fb", "ok", "telegram", "whatsapp", "viber", "instagram"])
+    ntc.add_argument("--request-id", type=int, default=None, dest="request_id")
+    ntc.add_argument("--tourist-id", type=int, default=None, dest="tourist_id")
+    ntc.set_defaults(func=cmd_notifications_create)
+
+    # cash
+    cs = sub.add_parser("cash", help="Кассы")
+    cs_sub = cs.add_subparsers(dest="sub", required=True)
+    csl = cs_sub.add_parser("list")
+    csl.set_defaults(func=cmd_cash_list)
+    csc = cs_sub.add_parser("create", help="Добавить кассу")
+    csc.add_argument("--name", required=True)
+    csc.set_defaults(func=cmd_cash_create)
+
+    # bills
+    bl = sub.add_parser("bills", help="Счета (для отчётности)")
+    bl_sub = bl.add_subparsers(dest="sub", required=True)
+    bll = bl_sub.add_parser("list")
+    bll.add_argument("--page", type=int, default=1)
+    bll.set_defaults(func=cmd_bills_list)
+    blg = bl_sub.add_parser("get")
+    blg.add_argument("id", type=int)
+    blg.set_defaults(func=cmd_bills_get)
+
+    # service-price (сезонные цены отеля)
+    sp = sub.add_parser("service-price", help="Сезонные цены услуги (по периодам)")
+    sp_sub = sp.add_subparsers(dest="sub", required=True)
+    spc = sp_sub.add_parser("create", help="Добавить блок цена-период")
+    spc.add_argument("--service-id", type=int, required=True, dest="service_id")
+    spc.add_argument("--date-begin", required=True, dest="date_begin", help="YYYY-MM-DD HH:MM:SS")
+    spc.add_argument("--date-end", required=True, dest="date_end")
+    spc.add_argument("--nights", type=int, default=None)
+    spc.add_argument("--netto-adult", default=None, dest="netto_adult")
+    spc.add_argument("--netto-child", default=None, dest="netto_child")
+    spc.add_argument("--netto-baby", default=None, dest="netto_baby")
+    spc.add_argument("--price-adult", default=None, dest="price_adult")
+    spc.add_argument("--price-child", default=None, dest="price_child")
+    spc.add_argument("--price-baby", default=None, dest="price_baby")
+    spc.set_defaults(func=cmd_service_price_create)
+    spu = sp_sub.add_parser("update", help="Обновить блок цена-период")
+    spu.add_argument("id", type=int)
+    spu.add_argument("--date-begin", default=None, dest="date_begin")
+    spu.add_argument("--date-end", default=None, dest="date_end")
+    spu.add_argument("--nights", type=int, default=None)
+    spu.add_argument("--netto-adult", default=None, dest="netto_adult")
+    spu.add_argument("--netto-child", default=None, dest="netto_child")
+    spu.add_argument("--netto-baby", default=None, dest="netto_baby")
+    spu.add_argument("--price-adult", default=None, dest="price_adult")
+    spu.add_argument("--price-child", default=None, dest="price_child")
+    spu.add_argument("--price-baby", default=None, dest="price_baby")
+    spu.set_defaults(func=cmd_service_price_update)
+    spd = sp_sub.add_parser("delete")
+    spd.add_argument("id", type=int)
+    spd.add_argument("--confirm", action="store_true")
+    spd.set_defaults(func=cmd_service_price_delete)
+
+    # user-cabinet
+    uc_ = sub.add_parser("user-cabinet", help="Личный кабинет туриста")
+    uc_sub = uc_.add_subparsers(dest="sub", required=True)
+    ucc = uc_sub.add_parser("create", help="Создать туристу ЛК на стороне U-On")
+    ucc.add_argument("--tourist-id", type=int, required=True, dest="tourist_id")
+    ucc.set_defaults(func=cmd_user_cabinet_create)
+
+    # request-file (файлы заявки)
+    rf = sub.add_parser("request-files", help="Файлы заявки (прикрепить/удалить по URL)")
+    rf_sub = rf.add_subparsers(dest="sub", required=True)
+    rfa = rf_sub.add_parser("attach", help="Прикрепить файл к заявке по URL")
+    rfa.add_argument("--request-id", type=int, required=True, dest="request_id")
+    rfa.add_argument("--name", required=True, help="Отображаемое имя файла")
+    rfa.add_argument("--url", required=True, help="URL на файл (S3/наш сервер/любой http)")
+    rfa.add_argument("--note", default=None)
+    rfa.add_argument("--private", action="store_true",
+                     help="Скрыть от туриста в его ЛК")
+    rfa.set_defaults(func=cmd_request_file_attach)
+    rfd = rf_sub.add_parser("delete", help="Удалить файл")
+    rfd.add_argument("id", type=int)
+    rfd.add_argument("--confirm", action="store_true")
+    rfd.set_defaults(func=cmd_request_file_delete)
+
+    # user-file
+    uf = sub.add_parser("user-files", help="Файлы карточки клиента")
+    uf_sub = uf.add_subparsers(dest="sub", required=True)
+    ufa = uf_sub.add_parser("attach", help="Прикрепить файл к карточке клиента (скан паспорта и т.д.)")
+    ufa.add_argument("--tourist-id", type=int, required=True, dest="tourist_id")
+    ufa.add_argument("--name", required=True, help="Отображаемое имя")
+    ufa.add_argument("--url", required=True, help="URL на файл")
+    ufa.add_argument("--note", default=None)
+    ufa.set_defaults(func=cmd_user_file_attach)
+
+    # webhook update
     # tourists-requests (привязка туристов к заявке)
     tr = sub.add_parser("tourists-requests", help="Привязка туристов к заявке")
     tr_sub = tr.add_subparsers(dest="sub", required=True)
@@ -1036,6 +1499,19 @@ def build_parser() -> argparse.ArgumentParser:
     ml = mng_sub.add_parser("list", help="Все сотрудники (опц. по офису)")
     ml.add_argument("--office-id", type=int, default=None, dest="office_id")
     ml.set_defaults(func=cmd_managers_list)
+    mc = mng_sub.add_parser("create", help="Добавить сотрудника в кабинет")
+    mc.add_argument("--name", required=True)
+    mc.add_argument("--surname", default=None)
+    mc.add_argument("--patronymic", default=None)
+    mc.add_argument("--email", required=True)
+    mc.add_argument("--password", required=True, help="Минимум 10 символов")
+    mc.add_argument("--company-id", type=int, required=True, dest="company_id")
+    mc.add_argument("--office-id", type=int, default=None, dest="office_id")
+    mc.add_argument("--phone", default=None)
+    mc.add_argument("--birthday", default=None, help="YYYY-MM-DD")
+    mc.add_argument("--note", default=None)
+    mc.add_argument("-F", "--field", action="append")
+    mc.set_defaults(func=cmd_manager_create)
 
     # statuses
     st = sub.add_parser("statuses", help="Справочники статусов")
@@ -1044,8 +1520,63 @@ def build_parser() -> argparse.ArgumentParser:
 
     # sources
     src = sub.add_parser("sources", help="Источники обращений")
-    src.add_argument("--list", action="store_true")
-    src.set_defaults(func=cmd_sources_list)
+    src_sub = src.add_subparsers(dest="sub", required=True)
+    srl = src_sub.add_parser("list")
+    srl.set_defaults(func=cmd_sources_list)
+    src_c = src_sub.add_parser("create", help="Добавить источник")
+    src_c.add_argument("--name", required=True)
+    src_c.set_defaults(func=cmd_sources_create)
+
+    # travel-types
+    tt = sub.add_parser("travel-types", help="Типы поездок")
+    tt_sub = tt.add_subparsers(dest="sub", required=True)
+    ttl = tt_sub.add_parser("list")
+    ttl.set_defaults(func=cmd_travel_types_list)
+    ttc = tt_sub.add_parser("create")
+    ttc.add_argument("--name", required=True)
+    ttc.set_defaults(func=cmd_travel_types_create)
+
+    # nutrition
+    nt2 = sub.add_parser("nutrition", help="Типы питания")
+    nt2_sub = nt2.add_subparsers(dest="sub", required=True)
+    nt2l = nt2_sub.add_parser("list")
+    nt2l.set_defaults(func=cmd_nutrition_list)
+    nt2c = nt2_sub.add_parser("create")
+    nt2c.add_argument("--name", required=True)
+    nt2c.set_defaults(func=cmd_nutrition_create)
+    nt2u = nt2_sub.add_parser("update")
+    nt2u.add_argument("id", type=int)
+    nt2u.add_argument("--name", required=True)
+    nt2u.set_defaults(func=cmd_nutrition_update)
+
+    # countries
+    co = sub.add_parser("countries", help="Страны")
+    co_sub = co.add_subparsers(dest="sub", required=True)
+    col = co_sub.add_parser("list")
+    col.set_defaults(func=cmd_countries_list)
+    coc = co_sub.add_parser("create")
+    coc.add_argument("--name", required=True)
+    coc.set_defaults(func=cmd_countries_create)
+    cou = co_sub.add_parser("update")
+    cou.add_argument("id", type=int)
+    cou.add_argument("--name", required=True)
+    cou.set_defaults(func=cmd_countries_update)
+
+    # cities
+    ci = sub.add_parser("cities", help="Города (по стране)")
+    ci_sub = ci.add_subparsers(dest="sub", required=True)
+    cil = ci_sub.add_parser("list")
+    cil.add_argument("country_id", type=int, help="ID страны (см. countries list)")
+    cil.add_argument("--page", type=int, default=1)
+    cil.set_defaults(func=cmd_cities_list)
+    cic = ci_sub.add_parser("create")
+    cic.add_argument("--name", required=True)
+    cic.add_argument("--country-id", type=int, required=True, dest="country_id")
+    cic.set_defaults(func=cmd_cities_create)
+    ciu = ci_sub.add_parser("update")
+    ciu.add_argument("id", type=int)
+    ciu.add_argument("--name", required=True)
+    ciu.set_defaults(func=cmd_cities_update)
 
     # webhooks
     wh = sub.add_parser("webhooks", help="Управление вебхуками")
@@ -1061,6 +1592,13 @@ def build_parser() -> argparse.ArgumentParser:
     whd = wh_sub.add_parser("delete", help="Удалить вебхук")
     whd.add_argument("id", type=int)
     whd.set_defaults(func=cmd_webhooks_delete)
+    whu = wh_sub.add_parser("update", help="Обновить вебхук (URL/метод/тип/заметка)")
+    whu.add_argument("id", type=int)
+    whu.add_argument("--type", type=int, default=None)
+    whu.add_argument("--url", default=None)
+    whu.add_argument("--method", default=None, choices=["GET", "POST", "PUT", "DELETE"])
+    whu.add_argument("--note", default=None)
+    whu.set_defaults(func=cmd_webhook_update)
 
     # reminders
     rem = sub.add_parser("reminders", help="Напоминания")
@@ -1076,6 +1614,20 @@ def build_parser() -> argparse.ArgumentParser:
     rc.add_argument("--to", required=True, dest="date_to", help="YYYY-MM-DD HH:MM:SS")
     rc.add_argument("-F", "--field", action="append")
     rc.set_defaults(func=cmd_reminders_create)
+    rls = rem_sub.add_parser("list", help="Список напоминаний (постранично)")
+    rls.add_argument("--page", type=int, default=1)
+    rls.set_defaults(func=cmd_reminders_list)
+    rg = rem_sub.add_parser("get", help="Получить одно напоминание по id")
+    rg.add_argument("id", type=int)
+    rg.set_defaults(func=cmd_reminders_get)
+    rbr = rem_sub.add_parser("by-request", help="Напоминания по заявке")
+    rbr.add_argument("request_id", type=int)
+    rbr.set_defaults(func=cmd_reminders_by_request)
+    rcl = rem_sub.add_parser("close", help="Завершить напоминание")
+    rcl.add_argument("id", type=int)
+    rcl.add_argument("--done-by", type=int, default=None, dest="done_by", help="ID менеджера, кто закрыл")
+    rcl.add_argument("--done-at", default=None, dest="done_at", help="YYYY-MM-DD HH:MM:SS; default — сейчас")
+    rcl.set_defaults(func=cmd_reminders_close)
 
     # extended_fields (доп. поля карточек)
     ef = sub.add_parser("fields", help="Дополнительные поля карточек (extended_fields)")
@@ -1197,6 +1749,28 @@ def build_parser() -> argparse.ArgumentParser:
     su_.set_defaults(func=cmd_suppliers_update)
     st_ = sup_sub.add_parser("types", help="Типы партнёров")
     st_.set_defaults(func=cmd_supplier_types)
+    stc = sup_sub.add_parser("type-create", help="Добавить тип партнёра")
+    stc.add_argument("--name", required=True)
+    stc.set_defaults(func=cmd_supplier_type_create)
+
+    # documents
+    doc = sub.add_parser("documents", help="Генерация документов по шаблону U-On")
+    doc_sub = doc.add_subparsers(dest="sub", required=True)
+    dg = doc_sub.add_parser("generate", help="Сгенерировать документ из заявки")
+    dg.add_argument("--template-id", type=int, required=True, dest="template_id",
+                    help="5=Договор, 42=Договор 2, 13=Лист бронирования, 14=Расчёт тура, 15=Счёт из заявки")
+    dg.add_argument("--request-id", type=int, required=True, dest="request_id")
+    dg.add_argument("--bill-id", type=int, default=None, dest="bill_id")
+    dg.add_argument("--supplier-id", type=int, default=None, dest="supplier_id")
+    dg.add_argument("--tourist-id", type=int, default=None, dest="tourist_id")
+    dg.add_argument("--with-sign", action="store_true", dest="with_sign",
+                    help="Отображать печать и подпись")
+    dg.add_argument("--date", default=None, help="Дата в документе YYYY-MM-DD")
+    dg.add_argument("--format", default="pdf", choices=["text", "doc", "pdf"])
+    dg.add_argument("--locale", default="ru", choices=["ru", "en", "uk", "az", "de", "fr", "hy", "it"])
+    dg.add_argument("--custom", action="store_true", help="Вручную созданный (не системный) шаблон")
+    dg.add_argument("-F", "--field", action="append")
+    dg.set_defaults(func=cmd_document_generate)
 
     # raw escape hatch
     raw = sub.add_parser("raw", help="Сырой вызов API (для неизвестных endpoint-ов)")
