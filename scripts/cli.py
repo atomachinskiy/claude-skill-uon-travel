@@ -445,6 +445,41 @@ def cmd_reminders_create(args, uon: UonClient) -> None:
     dump(uon.post("reminder/create", {k: v for k, v in data.items() if v is not None}))
 
 
+def cmd_fields_list(args, uon: UonClient) -> None:
+    resp = uon.get(f"extended_field/{args.page}")
+    # фильтр по разделу если указан
+    if args.section:
+        recs = resp.get("records", [])
+        recs = [r for r in recs if r.get("section") == args.section]
+        resp["records"] = recs
+    dump(resp)
+
+
+def cmd_fields_create(args, uon: UonClient) -> None:
+    data = {
+        "section": args.section,
+        "name": args.name,
+        "type": args.type,
+        "options": args.options,
+    }
+    dump(uon.post("extended_field/create", {k: v for k, v in data.items() if v is not None}))
+
+
+def cmd_fields_update(args, uon: UonClient) -> None:
+    data = {k: v for k, v in {
+        "section": args.section, "name": args.name, "type": args.type, "options": args.options,
+    }.items() if v is not None}
+    if not data:
+        sys.exit("Нечего обновлять")
+    dump(uon.post(f"extended_field/update/{args.id}", data))
+
+
+def cmd_fields_delete(args, uon: UonClient) -> None:
+    if not args.confirm:
+        sys.exit("Опасная операция. --confirm")
+    dump(uon.post(f"extended_field/delete/{args.id}", {}))
+
+
 def cmd_calls_log(args, uon: UonClient) -> None:
     import datetime as _dt
     data = {
@@ -915,6 +950,31 @@ def build_parser() -> argparse.ArgumentParser:
     rc.add_argument("--from", default=None, dest="date_from", help="YYYY-MM-DD HH:MM:SS")
     rc.add_argument("--to", default=None, dest="date_to")
     rc.set_defaults(func=cmd_reminders_create)
+
+    # extended_fields (доп. поля карточек)
+    ef = sub.add_parser("fields", help="Дополнительные поля карточек (extended_fields)")
+    ef_sub = ef.add_subparsers(dest="sub", required=True)
+    efl = ef_sub.add_parser("list", help="Список доп.полей (опц. по разделу)")
+    efl.add_argument("--section", type=int, default=None, help="1=заявка, 2=обращение, 3=турист, 4=услуга, 5=платёж клиент, 6=платёж партнёр, 7=косв. платёж, 8=партнёр")
+    efl.add_argument("--page", type=int, default=1)
+    efl.set_defaults(func=cmd_fields_list)
+    efc = ef_sub.add_parser("create", help="Добавить доп.поле")
+    efc.add_argument("--section", type=int, required=True, help="1=заявка, 2=обращение, 3=турист, 4=услуга, 5..8=платежи и партнёры")
+    efc.add_argument("--name", required=True, help="Название поля")
+    efc.add_argument("--type", type=int, default=1, help="1=текст (default), 2=список значений, 3=многострочное, 4=дата, 5=текст+ссылка")
+    efc.add_argument("--options", default=None, help="Значения списка через запятую (для type=2)")
+    efc.set_defaults(func=cmd_fields_create)
+    efu = ef_sub.add_parser("update", help="Обновить доп.поле")
+    efu.add_argument("id", type=int)
+    efu.add_argument("--section", type=int, default=None)
+    efu.add_argument("--name", default=None)
+    efu.add_argument("--type", type=int, default=None)
+    efu.add_argument("--options", default=None)
+    efu.set_defaults(func=cmd_fields_update)
+    efd = ef_sub.add_parser("delete", help="Удалить доп.поле")
+    efd.add_argument("id", type=int)
+    efd.add_argument("--confirm", action="store_true")
+    efd.set_defaults(func=cmd_fields_delete)
 
     # calls (call_history)
     cl = sub.add_parser("calls", help="История звонков (телефония)")
