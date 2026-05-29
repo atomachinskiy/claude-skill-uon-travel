@@ -1,0 +1,153 @@
+{
+  "name": "U-On Webhook Receiver",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "uon",
+        "options": {
+          "rawBody": false
+        },
+        "responseMode": "responseNode"
+      },
+      "id": "node-webhook",
+      "name": "U-On Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "uon-receiver"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "event_name",
+              "value": "={{ ({\n  '1': 'Создание обращения',\n  '2': 'Создание заявки',\n  '3': 'Создание клиента',\n  '9': 'Создание платежа',\n  '16': 'Изменение статуса в обращении',\n  '17': 'Изменение статуса в заявке',\n  '22': 'Добавление туриста в заявке',\n  '34': 'Добавление задачи',\n  '40': 'Изменение статуса в заявке (по оплате)',\n  '44': 'Удаление заявки',\n  '46': 'Создание счёта на оплату',\n  '59': 'Изменение планового платежа на оплаченный',\n  '61': 'Клик по номеру телефона клиента',\n  '63': 'Пропущенный звонок'\n}[$json.body.type_id] || ('Событие #' + $json.body.type_id)) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-set",
+      "name": "Resolve event name",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('U-On Webhook').item.json.body.type_id }}",
+                    "rightValue": "2",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "outputKey": "Новая заявка"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('U-On Webhook').item.json.body.type_id }}",
+                    "rightValue": "9",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "outputKey": "Платёж"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('U-On Webhook').item.json.body.type_id }}",
+                    "rightValue": "17",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "outputKey": "Смена статуса заявки"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "node-switch",
+      "name": "Route by type_id",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"ok\": true, \"event\": \"{{ $('Resolve event name').item.json.event_name }}\" }"
+      },
+      "id": "node-respond",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 600]
+    }
+  ],
+  "connections": {
+    "U-On Webhook": {
+      "main": [[{ "node": "Resolve event name", "type": "main", "index": 0 }]]
+    },
+    "Resolve event name": {
+      "main": [[{ "node": "Route by type_id", "type": "main", "index": 0 }]]
+    },
+    "Route by type_id": {
+      "main": [
+        [{ "node": "Respond OK", "type": "main", "index": 0 }],
+        [{ "node": "Respond OK", "type": "main", "index": 0 }],
+        [{ "node": "Respond OK", "type": "main", "index": 0 }],
+        [{ "node": "Respond OK", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false,
+  "version": "0.1.0",
+  "meta": {
+    "instanceId": "uon-receiver-template"
+  }
+}
