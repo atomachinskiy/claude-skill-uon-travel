@@ -56,3 +56,13 @@ n8n template нативно даёт распиновку по типам соб
 - U-On не подписывает webhook-ы. Любой, кто узнает URL, может слать события.
 - Если URL утёк — обновляйте URL receiver-а и регистрируйте новый в U-On (старый удаляйте через `uon webhooks delete <id>`).
 - Для production рекомендуем proxy-секрет: `?token=secret123` в URL, валидация на receiver-е.
+
+## Дебаг: куда смотреть когда receiver «молчит»
+
+`https://idXXXXX.u-on.ru/logs_webhooks.php` — встроенные логи U-On показывают:
+- Все исходящие webhook-вызовы с timestamp и type_id
+- Полный payload, который ушёл
+- HTTP-статус и тело ответа receiver-а
+- Retry-логика (U-On переотправляет при HTTP 5xx)
+
+Это первое место для дебага — быстрее, чем разбирать логи на стороне receiver-а. Подробнее в [`references/debugging.md`](../references/debugging.md).

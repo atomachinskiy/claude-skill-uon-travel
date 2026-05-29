@@ -295,6 +295,10 @@ python3 scripts/stats.py html-report --from 2026-05-01 --to 2026-05-31 -o report
 | `result:200, id:"3"` после POST | Это норма — поле `id` приходит строкой, не числом | Конвертировать на своей стороне |
 | Пустой массив `records:[]` | Либо ресурс пустой, либо неправильная пагинация | Сначала проверить базовый список без фильтров |
 | Сетевой timeout | IP не в whitelist, либо кабинет в режиме обслуживания | Проверить whitelist или повторить через 30 секунд |
+| `result:200`, но в кабинете данные не обновились | Поле create ≠ поле update (см. `conventions.md`) | Зайти в `idXXXXX.u-on.ru/logs_api.php` — видно, что U-On принял и какие поля распарсил |
+| Webhook не приходит на receiver | URL зарегистрирован, но receiver не получает | `idXXXXX.u-on.ru/logs_webhooks.php` — видно исходящие, статус, payload |
+
+При любой непонятной проблеме сначала открываем **встроенные логи U-On** ([`references/debugging.md`](references/debugging.md)) — это быстрее, чем гадать.
 
 ---
 
@@ -305,4 +309,6 @@ python3 scripts/stats.py html-report --from 2026-05-01 --to 2026-05-31 -o report
 - [`references/webhook-events.md`](references/webhook-events.md) — 69 типов webhook-событий с полями payload
 - [`references/lifecycle.md`](references/lifecycle.md) — жизненный цикл Lead → Request → Service → Payment
 - [`references/statuses.md`](references/statuses.md) — структура справочников статусов
+- [`references/conventions.md`](references/conventions.md) — 15 эмпирических подводных камней API
+- [`references/debugging.md`](references/debugging.md) — встроенные логи кабинета U-On (API, WebHooks, оплата, чат) для отладки интеграции
 - [`webhook-receivers/`](webhook-receivers/) — готовые receiver-ы под Cloudflare Worker, FastAPI, n8n, Telegram-bridge
