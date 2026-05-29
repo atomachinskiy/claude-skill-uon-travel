@@ -186,6 +186,30 @@ uon reminders create --request-id 12345 --text "Перезвонить" \
   --from "2026-05-30 11:00:00" --to "2026-05-30 11:30:00"
 ```
 
+### Звонки (телефония)
+
+```bash
+uon calls log --phone "+79991234567" --inbound --duration 180 --note "Клиент уточнил детали"
+uon calls log --phone "+79991234567" --record "https://my-pbx.example.com/rec/123.mp3"  # исходящий
+uon calls list --page 1
+uon calls by-request 123
+uon calls by-user 678
+```
+
+### Отели и поставщики
+
+```bash
+uon hotels list
+uon hotels get 5
+uon hotels create --name "Hilton Resort" --stars 5 --country-id 1 --city-id 1
+uon hotels update 5 --note "Обновили описание"
+uon hotels delete 5 --confirm
+
+uon suppliers types        # 1=Авиа, 2=Страховые, 3=Транспорт, 4=Туроператоры, 5=Турагентства
+uon suppliers list
+uon suppliers create --name "Pegas Touristik" --type-id 4 --inn 7704123456 --phone "+74951234567"
+```
+
 ### Сырые вызовы (escape hatch)
 
 ```bash

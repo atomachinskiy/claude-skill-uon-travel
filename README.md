@@ -1,5 +1,9 @@
 # claude-skill-uon-travel
 
+[![tests](https://github.com/atomachinskiy/claude-skill-uon-travel/actions/workflows/test.yml/badge.svg)](https://github.com/atomachinskiy/claude-skill-uon-travel/actions/workflows/test.yml)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
+
 Skill для Claude Code и Claude Desktop, дающий полный доступ к публичному API **[U-On.Travel CRM](https://u-on.ru)** — туристической CRM номер один в РФ.
 
 - 150 операций (read + write) в 42 ресурс-семействах
@@ -78,9 +82,11 @@ claude-skill-uon-travel/
 ## Roadmap
 
 - [x] **v1.0** MVP read-only + полная write API + bulk-регистрация 69 webhook-типов + 4 receiver-пакета + BI/stats + 7 reference-документов
-- [ ] **v1.1** Расширение: hotels/suppliers/bonuses/avia/insurance CRUD
-- [ ] **v1.2** Записанные фикстуры (replay-tests), CI на GitHub Actions
-- [ ] **v1.3** Примеры интеграций: Sheets, Notion, AmoCRM, Bitrix24
+- [x] **v1.1 (частично)** call_history, hotels CRUD, suppliers CRUD
+- [x] **v1.2** pytest + replay-фикстуры + GitHub Actions CI (ruff + shellcheck + pytest на py3.11/3.12)
+- [ ] **v1.1 (остаток)** bonuses/bcard/avia/mail/SMS/chat/catalog-package
+- [ ] **v1.3** Примеры интеграций: Sheets, Notion, AmoCRM, Bitrix24, Точка, TG-бот
+- [ ] **v1.4** Polish: pretty-tables, кэширование справочников, CLI completion
 
 См. [`BACKLOG.md`](BACKLOG.md) для деталей.
 

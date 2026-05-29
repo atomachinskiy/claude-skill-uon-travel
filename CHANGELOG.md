@@ -2,6 +2,27 @@
 
 Все важные изменения этого проекта документируются здесь. Формат — [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/). Семантическое версионирование — [SemVer](https://semver.org/lang/ru/).
 
+## [1.2.0] — 2026-05-29
+
+### Добавлено
+
+**v1.1 (частично)**
+- `calls log/list/by-request/by-user` — интеграция с телефонией (Mango/UIS/Sipuni). Поля: direction, duration, record_link, start.
+- `hotels list/get/create/update/delete` — каталог отелей. Поля: name, stars, address, country/city.
+- `suppliers list/get/create/update` + `suppliers types` — поставщики/туроператоры. 5 дефолтных типов.
+
+**v1.2**
+- `tests/conftest.py` — pytest-фикстура с моком urlopen, реалистичные replay-фикстуры из живого кабинета.
+- `tests/test_common.py` (6) + `tests/test_cli_commands.py` (24) — 30 тестов, проверяют URL paths и POST body field names, в т.ч. критичные gotcha (request_status_id vs status_id, type_id vs type, cio_id обязателен, summ vs amount).
+- `tests/fixtures/` — 10 реальных JSON-ответов из кабинета.
+- `pyproject.toml` — ruff config (E/F/I/B/UP, line=110) + pytest config.
+- `.github/workflows/test.yml` — matrix на py3.11/3.12, ruff + pytest + shellcheck. Зелёный badge в README.
+
+### Изменено
+
+- `scripts/cli.py` вырос с 718 до ~900 строк (добавлены 13 новых команд).
+- 19 авто-фиксов от ruff (импорты, `Optional` → `X | None`).
+
 ## [1.0.0] — 2026-05-29
 
 Первый стабильный релиз. Полное покрытие read+write+webhooks+BI на чистом Python без зависимостей.
@@ -55,4 +76,5 @@
 - 3 типа webhook-ов зарегистрированы + удалены (приёмка/cleanup)
 - BI funnel/revenue/html-report — сгенерировано
 
+[1.2.0]: https://github.com/atomachinskiy/claude-skill-uon-travel/releases/tag/v1.2.0
 [1.0.0]: https://github.com/atomachinskiy/claude-skill-uon-travel/releases/tag/v1.0.0
