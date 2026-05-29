@@ -1,0 +1,582 @@
+# 69 webhook event types — U-On.Travel (per-cabinet doc)
+
+Source: https://idXXXXX.u-on.ru/doc_webhooks.php
+
+
+## 1. Добавление задачи
+
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 34 (ID вебхука)
+- reminder_id - ID добавленной задачи
+- request_id - ID обращения/заявки
+- text - добавленный текст
+- tourist_id - ID туриста, если задача добавлена в карточку туриста
+- date_utc_diff - разница по времени от UTC
+- date_from - дата и время начала задачи (местное время)
+- date_from_msk - дата и время начала задачи (время по Москве)
+- date_to - дата и время окончания задачи (местное время)
+- date_to_msk - дата и время окончания задачи (время по Москве)
+- Добавление комментария в заявке или в карточке туриста
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 31 (ID вебхука)
+- request_action_id - ID добавленного комментария
+- request_id - ID обращения/заявки
+- text - добавленный текст
+- files - файлы (массив)
+- messenger - наименование мессенджера/соцсети, в которую отправлен комментарий
+- tourist_id - ID туриста, если комментарий добавлен в карточку туриста
+- Добавление номера брони в заявке
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 35 (ID вебхука)
+- reservation_number_old - старое значение номера брони
+- reservation_number_new - новое значение номера брони
+- Добавление отзыва туриста
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 64 (ID вебхука)
+- feedback_id - ID отзыва
+- request_id - ID обращения/заявки
+- date - Дата отзыва
+- text - Текст отзыва
+- rating - Рейтинг отзыва (1-10)
+- Добавление прикрепленного файла у клиента/туриста
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 70 (ID вебхука)
+- client_id - ID туриста/клиента
+- Добавление туриста в заявке
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 22 (ID вебхука)
+- tourist_id - ID туриста
+- r_id - ID заявки
+- Добавление цены клиента в заявке
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 37 (ID вебхука)
+- r_id - ID заявки
+- price_old - Старая цена
+- price_new - Новая цена
+- Добавление цены нетто в заявке
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 36 (ID вебхука)
+- r_id - ID заявки
+- price_old - Старая себестоимость
+- price_new - Новая себестоимость
+- Изменение клиента
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 4 (ID вебхука)
+- client_id - ID заказчика/туриста
+- Изменение менеджера
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 61 (ID вебхука)
+- manager_id - ID менеджера
+- Изменение менеджера в заявке
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 30 (ID вебхука)
+- r_id - ID заявки
+- old_manager_id - ID старого менеджера
+- new_manager_id - ID нового менеджера
+- Изменение менеджера в обращении
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 29 (ID вебхука)
+- r_id - ID обращения
+- old_manager_id - ID старого менеджера
+- new_manager_id - ID нового менеджера
+- Изменение номера брони в заявке
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 33 (ID вебхука)
+- reservation_number_old - старое значение номера брони
+- reservation_number_new - новое значение номера брони
+- Изменение отзыва туриста
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 65 (ID вебхука)
+- feedback_id - ID отзыва
+- date_old - Старая дата отзыва
+- text_old - Старый текст отзыва
+- rating_old - Старый рейтинг отзыва (1-10)
+- date_new - Новая дата отзыва
+- text_new - Новый текст отзыва
+- rating_new - Новый рейтинг отзыва (1-10)
+- Изменение офиса в заявке
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 52 (ID вебхука)
+- request_id - ID заявки
+- office_old - ID старого офиса
+- office_new - ID нового офиса
+- Изменение офиса в обращении
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 51 (ID вебхука)
+- request_id - ID заявки
+- office_old - ID старого офиса
+- office_new - ID нового офиса
+- Изменение партнера
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 13 (ID вебхука)
+- supplier_id - ID партнера
+- Изменение планового платежа на оплаченный
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 40 (ID вебхука)
+- request_id - ID заявки
+- payment_id - ID платежа
+- Изменение платежа
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 7 (ID вебхука)
+- request_id - ID заявки
+- payment_id - ID платежа
+- Изменение примечания в заявке
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 73 (ID вебхука)
+- request_id - ID заявки
+- note_old - старое примечание
+- note_new - новое примечание
+- Изменение примечания в обращении
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 72 (ID вебхука)
+- request_id - ID обращения
+- note_old - старое примечание
+- note_new - новое примечание
+- Изменение причины отказа в обращении
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 27 (ID вебхука)
+- request_id - ID обращения
+- reason_deny_id_old - ID старой причины отказа
+- reason_deny_id_new - ID новой причины отказа
+- Изменение статуса в заявке
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 17 (ID вебхука)
+- request_id - ID заявки
+- status_id_old - ID старого статуса
+- status_id_new - ID нового статуса
+- Изменение статуса в заявке (по оплате)
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 50 (ID вебхука)
+- request_id - ID заявки
+- status_id_old - ID старого статуса
+- status_id_new - ID нового статуса
+- Изменение статуса в обращении
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 16 (ID вебхука)
+- request_id - ID обращения
+- status_id_old - ID старого статуса
+- status_id_new - ID нового статуса
+- Изменение статуса менеджера
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 67 (ID вебхука)
+- user_id - ID менеджера
+- status_id_new - Статус менеджера (новый). Значения: 1 - свободен, 2 - занят, 3 - отсутствую
+- Изменение типа заявки
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 54 (ID вебхука)
+- request_id - ID заявки
+- type_old - ID старого типа
+- type_new - ID нового типа
+- Изменение типа обращения
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 53 (ID вебхука)
+- request_id - ID заявки
+- type_old - ID старого типа
+- type_new - ID нового типа
+- Изменение туроператора в заявке
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 59 (ID вебхука)
+- tour_operator_id_old - старое значение ID туроператора
+- tour_operator_id_new - новое значение ID туроператора
+- Изменение услуги в заявке
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 10 (ID вебхука)
+- request_id - ID заявки
+- service_id - ID услуги
+- Изменение цены клиента в заявке
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 19 (ID вебхука)
+- r_id - ID заявки
+- price_old - Старая цена
+- price_new - Новая цена
+- Изменение цены нетто в заявке
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 18 (ID вебхука)
+- r_id - ID заявки
+- price_old - Старая себестоимость
+- price_new - Новая себестоимость
+- Клик по номеру телефона клиента
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 47 (ID вебхука)
+- phone - номер телефона
+- client_id - ID клиента (если определен)
+- method = 'call'
+- Начисление баллов клиенту
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 24 (ID вебхука)
+- client_id - ID клиента
+- bonus_card_id - ID бонусной карты клиента
+- bonuses - Количество бонусов
+- request_id - ID заявки
+- reason - причина операции
+- till_date - дата сгорания баллов (если была установлена), иначе пусто
+- increase = 1 (если начисление)
+- decrease = 1 (если списание)
+- Операция при онлайн-оплате (заморозка денежных средств)
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 45 (ID вебхука)
+- bill_id - ID счета
+- request_id - ID обращения/заявки
+- sum - сумма
+- Операция при онлайн-оплате (списание денежных средств)
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 46 (ID вебхука)
+- bill_id - ID счета
+- request_id - ID обращения/заявки
+- sum - сумма
+- Открепление покупателя от заявки
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 26 (ID вебхука)
+- client_id - ID заказчика
+- request_id - ID обращения/заявки
+- is_lead = 1 (если обращение) = 0 (если заявка)
+- Отправка кода подтверждения на подпись документа по смс
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 74 (ID вебхука)
+- client_id - ID заказчика
+- request_id - ID обращения/заявки
+- name - введенные заказчиком ФИО
+- phone - введенный заказчиком номер телефона
+- code - код подтверждения для заказчика
+- text - текст СМС-сообщения
+- Отправка сообщения в чате
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 15 (ID вебхука)
+- sender = [
+- user_id - ID отправителя (турист / менеджер)
+- email - E-mail отправителя
+- ]
+- sender_is_client - Если отправитель турист (true) или менеджер (false)
+- receiver = [
+- user_id - ID получателя (турист / менеджер)
+- email - E-mail получателя
+- ]
+- receiver_is_client - Если получатель турист (true) или менеджер (false)
+- text - Текст сообщения
+- files - Массив файлов (если они были прикреплены)
+- Отправка E-mail (вручную менеджером)
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 58 (ID вебхука)
+- email - Адресат
+- subject - Тема сообщения
+- text - Текст сообщения
+- Отправка SMS (вручную менеджером)
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 57 (ID вебхука)
+- phone - Адресат
+- text - Текст сообщения
+- Отправка ссылки на подпись документа по смс
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 63 (ID вебхука)
+- request_id - ID обращения/заявки
+- client_id - ID туриста
+- surname - Фамилия туриста
+- name - Имя туриста
+- sname - Отчество туриста
+- phone - Телефон туриста
+- email - E-mail туриста
+- template_id - ID шаблона документа
+- link - Ссылка на документ для подписи по смс
+- Ошибка фискализации в заявке
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 71 (ID вебхука)
+- request_id - ID обращения/заявки
+- text - Текст ошибки
+- Подпись документа по смс
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 39 (ID вебхука)
+- request_id - ID обращения/заявки
+- client_id - ID туриста
+- name - Имя туриста
+- phone - Телефон туриста
+- doc_name - Наименование документа
+- doc_url - Ссылка на документ
+- Получение письма от туроператора по номеру брони
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 48 (ID вебхука)
+- request_id - ID обращения/заявки
+- reservation_number - Номер брони
+- send_to_email - Отправлено на почту менеджера
+- Прикрепление бонусной карты к туристу
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 28 (ID вебхука)
+- bonus_card_id - ID бонусной карты
+- client_id - ID туриста
+- Прикрепление покупателя в заявке
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 25 (ID вебхука)
+- client_id - ID покупателя
+- request_id - ID обращения/заявки
+- is_lead = 1 (если обращение)
+- Прикрепление файла в заявке
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 20 (ID вебхука)
+- r_id - ID обращения/заявки
+- file_id - ID прикрепленного файла
+- Пропущенный звонок по телефонии
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 44 (ID вебхука)
+- manager_id - ID прикрепленного менеджера
+- manager_name - ФИО прикрепленного менеджера
+- client_name - ФИО туриста
+- phone - Телефон туриста
+- extension - Внутренний телефон менеджера (передается не от каждой телефонии)
+- line_number - Телефонный номер компании, по которому звонил турист (передается не от каждой телефонии)
+- Создание заявки
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 2 (ID вебхука)
+- request_id - ID заявки
+- Создание клиента
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 3 (ID вебхука)
+- client_id - ID клиента
+- Создание копии заявки
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 69 (ID вебхука)
+- request_id - ID заявки, с которой делается копия
+- new_request_id - ID новой заявки
+- Создание менеджера
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 60 (ID вебхука)
+- manager_id - ID менеджера
+- Создание обращения
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 1 (ID вебхука)
+- request_id - ID обращения
+- Создание партнера
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 12 (ID вебхука)
+- supplier_id - ID партнера
+- Создание платежа
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 6 (ID вебхука)
+- request_id - ID заявки
+- payment_id - ID платежа
+- Создание счета на оплату
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 49 (ID вебхука)
+- request_id - ID заявки
+- bill_id - ID счета
+- sum - Сумма счета
+- payment_url - Ссылка на оплату (для онлайн-счета, созданного через сторонний сервис оплаты)
+- Создание услуги в заявке
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 9 (ID вебхука)
+- service_id - ID услуги
+- request_id - ID заявки
+- Удаление заявки
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 56 (ID вебхука)
+- request_id - ID заявки
+- Удаление клиента
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 5 (ID вебхука)
+- client_id - ID заказчик/туриста
+- Удаление обращения
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 55 (ID вебхука)
+- request_id - ID обращения
+- Удаление отзыва туриста
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 66 (ID вебхука)
+- feedback_id - ID отзыва
+- request_id - ID обращения/заявки
+- date - Дата отзыва
+- text - Текст отзыва
+- rating - Рейтинг отзыва (1-10)
+- Удаление прикрепленного файла у туриста/клиента
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 68 (ID вебхука)
+- client_id - ID туриста/клиента
+- Уведомление туриста о событиях (перед вылетом / после возвращения и т.д.)
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 32 (ID вебхука)
+- notification_id = ID уведомления
+- 26 = Поздравление с Днем Рождения
+- 44 = Перед вылетом
+- 45 = По возвращению
+- 46 = Подтверждение оплаты
+- 47 = Изменение статуса заявки
+- 48 = Создание личного кабинета
+- 49 = Создание новой заявки
+- 50 = Окончание срока действия загранпаспорта
+- 51 = Приближение deadline'а по оплате
+- 52 = Напоминание о назначенной встрече
+- 58 = Окончание срока действия визы
+- 59 = Создание нового обращения
+- 61 = Создание бонусной карты
+- 62 = Начисление баллов на бонусную карту
+- 63 = Окончания срока сгорания баллов
+- 64 = Начисление баллов в День Рождения
+- request_id - ID заявки
+- client_id - ID заказчик/туриста
+- bonuses - количество бонусов (если были начислены)
+- bonuses_till_date - дата сгорания бонусов (если были начислены)
+- is_sms - отправлено смс? 1 - да / 2 - нет
+- is_mail - отправлено e-mail? 1 - да / 2 - нет
+- text_sms - текст смс уведомления
+- text_email - текст e-mail уведомления
+- manager_is_email - отправлено email менеджеру? 1 - да / 2 - нет
+- manager_is_sms - отправлено смс менеджеру? 1 - да / 2 - нет
+- Удаление партнера
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 14 (ID вебхука)
+- supplier_id - ID партнера
+- Удаление платежа
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 8 (ID вебхука)
+- request_id - ID заявки
+- payment_id - ID платежа
+- Удаление туриста из заявки
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 23 (ID вебхука)
+- r_id - ID заявки
+- tourist_id - ID туриста
+- Удаление услуги из заявки
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 11 (ID вебхука)
+- service_id - ID услуги
+- request_id - ID заявки
+- Удаление файла из заявки
+- uon_id - ID кабинета в U-ON.Travel
+- uon_subdomain - Поддомен кабинета в U-ON.Travel (<...>.u-on.ru)
+- datetime - Дата/время (YYYY-mm-dd HH:ii:ss)
+- type_id = 21 (ID вебхука)
+- r_id - ID заявки
+- file_id - ID удаляемого файла

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# uon — тонкая обёртка над cli.py для удобства в шелле.
+# Кладите этот файл в PATH (например, ln -s scripts/uon ~/.local/bin/uon).
+exec python3 "$(dirname "$(readlink -f "$0")")/cli.py" "$@"
