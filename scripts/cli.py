@@ -388,6 +388,128 @@ def cmd_reminders_create(args, uon: UonClient) -> None:
     dump(uon.post("reminder/create", {k: v for k, v in data.items() if v is not None}))
 
 
+def cmd_calls_log(args, uon: UonClient) -> None:
+    import datetime as _dt
+    data = {
+        "phone": args.phone,
+        "start": args.start or _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "direction": 2 if args.inbound else 1,
+        "duration": args.duration,
+        "record_link": args.record,
+        "manager_id": args.manager_id,
+        "office_id": args.office_id,
+        "note": args.note,
+    }
+    for kv in args.field or []:
+        k, _, v = kv.partition("=")
+        data[k.strip()] = v.strip()
+    dump(uon.post("call_history/create", {k: v for k, v in data.items() if v is not None}))
+
+
+def cmd_calls_list(args, uon: UonClient) -> None:
+    dump(uon.get(f"call_history/{args.page}"))
+
+
+def cmd_calls_by_request(args, uon: UonClient) -> None:
+    dump(uon.get(f"call_history_by_request/{args.request_id}/{args.page}"))
+
+
+def cmd_calls_by_user(args, uon: UonClient) -> None:
+    dump(uon.get(f"call_history_by_user/{args.tourist_id}/{args.page}"))
+
+
+def cmd_hotels_list(args, uon: UonClient) -> None:
+    dump(uon.get(f"hotels/{args.page}"))
+
+
+def cmd_hotels_get(args, uon: UonClient) -> None:
+    dump(uon.get(f"hotel/{args.id}"))
+
+
+def cmd_hotels_create(args, uon: UonClient) -> None:
+    data = {
+        "name": args.name,
+        "city_id": args.city_id,
+        "country_id": args.country_id,
+        "stars": args.stars,
+        "address": args.address,
+        "phone": args.phone,
+        "website": args.website,
+        "email": args.email,
+        "note": args.note,
+    }
+    for kv in args.field or []:
+        k, _, v = kv.partition("=")
+        data[k.strip()] = v.strip()
+    dump(uon.post("hotel/create", {k: v for k, v in data.items() if v is not None}))
+
+
+def cmd_hotels_update(args, uon: UonClient) -> None:
+    data = {k: v for k, v in {
+        "name": args.name, "stars": args.stars, "address": args.address,
+        "phone": args.phone, "website": args.website, "email": args.email,
+        "note": args.note,
+    }.items() if v is not None}
+    for kv in args.field or []:
+        k, _, v = kv.partition("=")
+        data[k.strip()] = v.strip()
+    if not data:
+        sys.exit("Нечего обновлять")
+    dump(uon.post(f"hotel/update/{args.id}", data))
+
+
+def cmd_hotels_delete(args, uon: UonClient) -> None:
+    if not args.confirm:
+        sys.exit("Опасная операция. --confirm")
+    dump(uon.post(f"hotel/delete/{args.id}", {}))
+
+
+def cmd_suppliers_list(args, uon: UonClient) -> None:
+    if args.page > 1:
+        dump(uon.get(f"suppliers/{args.page}"))
+    else:
+        dump(uon.get("supplier"))
+
+
+def cmd_suppliers_get(args, uon: UonClient) -> None:
+    dump(uon.get(f"supplier/{args.id}"))
+
+
+def cmd_suppliers_create(args, uon: UonClient) -> None:
+    data = {
+        "name": args.name,
+        "name_official": args.name_official,
+        "type_id": args.type_id,
+        "inn": args.inn,
+        "kpp": args.kpp,
+        "phone": args.phone,
+        "email": args.email,
+        "website": args.website,
+        "note": args.note,
+    }
+    for kv in args.field or []:
+        k, _, v = kv.partition("=")
+        data[k.strip()] = v.strip()
+    dump(uon.post("supplier/create", {k: v for k, v in data.items() if v is not None}))
+
+
+def cmd_suppliers_update(args, uon: UonClient) -> None:
+    data = {k: v for k, v in {
+        "name": args.name, "phone": args.phone, "email": args.email,
+        "website": args.website, "note": args.note,
+    }.items() if v is not None}
+    for kv in args.field or []:
+        k, _, v = kv.partition("=")
+        data[k.strip()] = v.strip()
+    if not data:
+        sys.exit("Нечего обновлять")
+    dump(uon.post(f"supplier/update/{args.id}", data))
+
+
+def cmd_supplier_types(args, uon: UonClient) -> None:
+    dump(uon.get("supplier_type"))
+
+
 def cmd_raw_get(args, uon: UonClient) -> None:
     dump(uon.get(args.endpoint))
 
@@ -685,6 +807,102 @@ def build_parser() -> argparse.ArgumentParser:
     rc.add_argument("--from", default=None, dest="date_from", help="YYYY-MM-DD HH:MM:SS")
     rc.add_argument("--to", default=None, dest="date_to")
     rc.set_defaults(func=cmd_reminders_create)
+
+    # calls (call_history)
+    cl = sub.add_parser("calls", help="История звонков (телефония)")
+    cl_sub = cl.add_subparsers(dest="sub", required=True)
+    clog = cl_sub.add_parser("log", help="Залогировать звонок")
+    clog.add_argument("--phone", required=True)
+    clog.add_argument("--inbound", action="store_true", help="Входящий (default — исходящий)")
+    clog.add_argument("--duration", type=int, default=None, help="Длительность в секундах")
+    clog.add_argument("--start", default=None, help="YYYY-MM-DD HH:MM:SS; default — сейчас")
+    clog.add_argument("--record", default=None, help="URL записи разговора")
+    clog.add_argument("--manager-id", type=int, default=None, dest="manager_id")
+    clog.add_argument("--office-id", type=int, default=None, dest="office_id")
+    clog.add_argument("--note", default=None)
+    clog.add_argument("-F", "--field", action="append")
+    clog.set_defaults(func=cmd_calls_log)
+    cll = cl_sub.add_parser("list", help="Список звонков")
+    cll.add_argument("--page", type=int, default=1)
+    cll.set_defaults(func=cmd_calls_list)
+    clr = cl_sub.add_parser("by-request", help="Звонки по заявке")
+    clr.add_argument("request_id", type=int)
+    clr.add_argument("--page", type=int, default=1)
+    clr.set_defaults(func=cmd_calls_by_request)
+    clu = cl_sub.add_parser("by-user", help="Звонки по клиенту")
+    clu.add_argument("tourist_id", type=int)
+    clu.add_argument("--page", type=int, default=1)
+    clu.set_defaults(func=cmd_calls_by_user)
+
+    # hotels CRUD
+    hot = sub.add_parser("hotels", help="Каталог отелей")
+    hot_sub = hot.add_subparsers(dest="sub", required=True)
+    hl = hot_sub.add_parser("list", help="Список отелей")
+    hl.add_argument("--page", type=int, default=1)
+    hl.set_defaults(func=cmd_hotels_list)
+    hg = hot_sub.add_parser("get", help="Получить отель по id")
+    hg.add_argument("id", type=int)
+    hg.set_defaults(func=cmd_hotels_get)
+    hc = hot_sub.add_parser("create", help="Добавить отель")
+    hc.add_argument("--name", required=True)
+    hc.add_argument("--city-id", type=int, default=None, dest="city_id")
+    hc.add_argument("--country-id", type=int, default=None, dest="country_id")
+    hc.add_argument("--stars", type=int, default=None)
+    hc.add_argument("--address", default=None)
+    hc.add_argument("--phone", default=None)
+    hc.add_argument("--website", default=None)
+    hc.add_argument("--email", default=None)
+    hc.add_argument("--note", default=None)
+    hc.add_argument("-F", "--field", action="append")
+    hc.set_defaults(func=cmd_hotels_create)
+    hu = hot_sub.add_parser("update", help="Обновить отель")
+    hu.add_argument("id", type=int)
+    hu.add_argument("--name", default=None)
+    hu.add_argument("--stars", type=int, default=None)
+    hu.add_argument("--address", default=None)
+    hu.add_argument("--phone", default=None)
+    hu.add_argument("--website", default=None)
+    hu.add_argument("--email", default=None)
+    hu.add_argument("--note", default=None)
+    hu.add_argument("-F", "--field", action="append")
+    hu.set_defaults(func=cmd_hotels_update)
+    hd = hot_sub.add_parser("delete", help="Удалить отель")
+    hd.add_argument("id", type=int)
+    hd.add_argument("--confirm", action="store_true")
+    hd.set_defaults(func=cmd_hotels_delete)
+
+    # suppliers CRUD
+    sup = sub.add_parser("suppliers", help="Поставщики / туроператоры / партнёры")
+    sup_sub = sup.add_subparsers(dest="sub", required=True)
+    sl = sup_sub.add_parser("list", help="Список поставщиков")
+    sl.add_argument("--page", type=int, default=1)
+    sl.set_defaults(func=cmd_suppliers_list)
+    sg = sup_sub.add_parser("get", help="Получить поставщика по id")
+    sg.add_argument("id", type=int)
+    sg.set_defaults(func=cmd_suppliers_get)
+    sc = sup_sub.add_parser("create", help="Добавить поставщика")
+    sc.add_argument("--name", required=True)
+    sc.add_argument("--name-official", default=None, dest="name_official")
+    sc.add_argument("--type-id", type=int, default=None, dest="type_id", help="ID типа партнёра (см. suppliers types)")
+    sc.add_argument("--inn", default=None)
+    sc.add_argument("--kpp", default=None)
+    sc.add_argument("--phone", default=None)
+    sc.add_argument("--email", default=None)
+    sc.add_argument("--website", default=None)
+    sc.add_argument("--note", default=None)
+    sc.add_argument("-F", "--field", action="append")
+    sc.set_defaults(func=cmd_suppliers_create)
+    su_ = sup_sub.add_parser("update", help="Обновить поставщика")
+    su_.add_argument("id", type=int)
+    su_.add_argument("--name", default=None)
+    su_.add_argument("--phone", default=None)
+    su_.add_argument("--email", default=None)
+    su_.add_argument("--website", default=None)
+    su_.add_argument("--note", default=None)
+    su_.add_argument("-F", "--field", action="append")
+    su_.set_defaults(func=cmd_suppliers_update)
+    st_ = sup_sub.add_parser("types", help="Типы партнёров")
+    st_.set_defaults(func=cmd_supplier_types)
 
     # raw escape hatch
     raw = sub.add_parser("raw", help="Сырой вызов API (для неизвестных endpoint-ов)")

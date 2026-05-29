@@ -14,11 +14,10 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
+from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
-from urllib.error import HTTPError, URLError
-
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -55,7 +54,7 @@ class UonClient:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         fmt: str = "json",
         timeout: int = 30,
         throttle_ms: int = 150,

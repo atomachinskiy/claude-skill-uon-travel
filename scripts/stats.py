@@ -18,7 +18,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import statistics
 import sys
 from collections import Counter, defaultdict
@@ -78,9 +77,9 @@ def cmd_funnel(args) -> None:
     total_leads = len(leads)
     total_reqs = len(requests)
 
-    print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print(f"  Воронка {args.date_from} → {args.date_to}")
-    print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print(f"  Обращения (lead):  {total_leads}")
     print(f"  Заявки (request):  {total_reqs}")
     print(f"    в работе:        {active}")
@@ -95,7 +94,7 @@ def cmd_funnel(args) -> None:
 
     if args.by_source:
         by_src = Counter(r.get("source_name", "не указан") or "не указан" for r in requests)
-        print(f"\n  Заявки по источникам:")
+        print("\n  Заявки по источникам:")
         for src, n in by_src.most_common(10):
             print(f"    {src:30s} {n}")
 
@@ -118,9 +117,9 @@ def cmd_revenue(args) -> None:
         counts[str(key)] += 1
 
     total = sum(sums.values())
-    print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print(f"  Выручка по {args.group} за {args.date_from} → {args.date_to}")
-    print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print(f"  Всего: {total:,.0f} ₽ ({len(requests)} заявок)")
     print()
     for k, v in sorted(sums.items(), key=lambda x: x[1], reverse=True):
@@ -141,9 +140,9 @@ def cmd_avg_check(args) -> None:
     if not checks:
         print("Нет данных по заявкам с услугами")
         return
-    print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print(f"  Чек по заявкам {args.date_from} → {args.date_to}")
-    print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print(f"  Заявок с услугами: {len(checks)}")
     print(f"  Сумма:             {sum(checks):,.0f} ₽")
     print(f"  Средний чек:       {statistics.mean(checks):,.0f} ₽")
@@ -169,9 +168,9 @@ def cmd_cycle(args) -> None:
     if not days:
         print("Нет закрытых заявок с датами в этом периоде")
         return
-    print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print(f"  Время сделки {args.date_from} → {args.date_to}")
-    print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print(f"  Закрытых заявок:   {len(days)}")
     print(f"  Среднее:           {statistics.mean(days):.1f} дн")
     print(f"  Медиана:           {statistics.median(days):.1f} дн")
@@ -182,16 +181,16 @@ def cmd_churn(args) -> None:
     uon = UonClient()
     leads = _fetch_paginated(uon, f"leads/{args.date_from}/{args.date_to}/{{page}}", "leads")
     reasons = Counter()
-    for l in leads:
-        rd = l.get("reason_deny_name") or l.get("reason_deny")
+    for lead in leads:
+        rd = lead.get("reason_deny_name") or lead.get("reason_deny")
         if rd:
             reasons[str(rd)] += 1
     if not reasons:
         print("Нет причин отказа в обращениях за период")
         return
-    print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print(f"  Топ причин отказа {args.date_from} → {args.date_to}")
-    print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     for r, n in reasons.most_common(15):
         print(f"  {n:4d}  {r}")
 
@@ -214,9 +213,9 @@ def cmd_overdue(args) -> None:
         if d < datetime.now().date():
             overdue.append({"id": r["id"], "client": f"{r.get('client_name','')} {r.get('client_surname','')}".strip(),
                             "end": str(end)[:10], "pay_status": pay_status})
-    print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print(f"  Просроченные заявки на {today}")
-    print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print(f"  Всего: {len(overdue)}")
     for o in overdue[:30]:
         print(f"  #{o['id']:6} {o['client']:30s}  end={o['end']}  pay_status={o['pay_status']}")
